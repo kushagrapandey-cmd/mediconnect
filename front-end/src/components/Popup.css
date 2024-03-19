@@ -1,0 +1,28 @@
+.popup-message {
+    /* Styles for the popup */
+    position: fixed; /* Make the popup fixed to the viewport */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the popup horizontally and vertically */
+    width: auto;
+    height: 300px; /* Adjust the height as needed */
+    background-color: antiquewhite;
+    color: black;
+    font-size: x-large;
+    text-align: center;
+    padding: 130px; /* Add padding for better visual separation */
+    border-radius: 5px; /* Add rounded corners for a card-like appearance */
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); /* Add a subtle shadow effect */
+    z-index: 10; /* Ensure the popup is above other elements */
+  }
+  
+  .popup-message.hidden {
+    display: none; /* Hide the popup when needed */
+  }
+  
+  body { /* Apply styling to the entire body for the blurred background effect */
+    
+    background-color: rgba(0, 0, 0, 0.5); /* Add a semi-transparent background color */
+    backdrop-filter: blur(5px); /* Apply blur filter to the background */
+  }
+  

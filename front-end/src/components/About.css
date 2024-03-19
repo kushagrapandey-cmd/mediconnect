@@ -1,0 +1,8 @@
+.about {
+    background-image: url("./back2.jpg");
+    background-size: cover; /* Set background size to cover the entire container */
+  background-repeat: no-repeat; /* Prevent the background image from repeating */
+  background-position: center ;
+  background-attachment: fixed;
+  backdrop-filter:  blur(10px);
+}

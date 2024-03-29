@@ -131,6 +131,26 @@ router.get("/uploadedFiles/:userId", async (req, res) => {
   }
 });
 
+//GET files for doctors
+router.get("/uploadedFile/:uniqueCode", async (req, res) => {
+  try {
+    const { uniqueCode } = req.params;
+    const user = await User.findOne({ uniqueCode });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const uploadedFiles = user.uploadedFiles;
+    res.status(200).json({ files: uploadedFiles });
+  } catch (error) {
+    console.error("Error fetching uploaded files:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
+
 async function getFileFromDrive(filename) {
   try {
     const drive = google.drive({ version: "v3", auth: await authorize() });

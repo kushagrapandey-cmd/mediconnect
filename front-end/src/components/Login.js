@@ -35,6 +35,9 @@ function Login() {
         // Redirect user based on their role (replace with your logic)
         const role = response.data.role;
         if (role === "doctor") {
+          setName(response.data.name);
+          setIsLoggedIn(true);
+          setUserId(response.data._id);
           navigate("/doctor-dashboard");
         } else if (role === "patient") {
           setName(response.data.name);

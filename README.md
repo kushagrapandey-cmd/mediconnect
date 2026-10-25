@@ -15,6 +15,7 @@ MediConnect addresses fragmented medical documents: patients upload and organise
 - Doctor view of consenting patients and their shared libraries; every read/download checks the current grant.
 - Patient activity timeline covering uploads, downloads, views and permission changes.
 - Responsive pages, keyboard navigation, native modal focus management and reduced-motion support.
+- Vite production build, with a small dependency tree and optimized team portraits.
 
 ## Architecture and stack
 
@@ -28,25 +29,25 @@ flowchart TD
   D --> G[Expiring grants and activity]
 ```
 
-The original project used local MongoDB and Google Drive. The deployed revision retains **React and Express**, and uses a dedicated free Neon PostgreSQL database through the user's existing Vercel integration. No existing MongoDB data is migrated or deleted. Do not describe this revision as MERN: it is React + Express + PostgreSQL.
+The original project used local MongoDB, Google Drive and Create React App. The obsolete build toolchain was replaced by Vite without changing the React framework. The deployed revision retains **React and Express**, and uses a dedicated free Neon PostgreSQL database through the user's existing Vercel integration. No existing MongoDB data is migrated or deleted. Do not describe this revision as MERN: it is React + Express + PostgreSQL.
 
 For this bounded showcase, small files are stored as base64 content in the database. This avoids public medical file URLs and an additional storage service. Base64 adds approximately 33% storage overhead; a larger deployment should stream files from private object storage and retain metadata in the database.
 
 ### Code map
 
-| Path                           | Responsibility                                           |
-| ------------------------------ | -------------------------------------------------------- |
-| `front-end/src/App.js`         | Application shell, session bootstrap, routing            |
-| `front-end/src/Home.js`        | Public landing page                                      |
-| `front-end/src/AuthPage.js`    | Registration and login                                   |
-| `front-end/src/Dashboard.js`   | Patient and doctor workflows                             |
-| `front-end/src/UploadModal.js` | Upload form and validation feedback                      |
-| `front-end/src/shared.js`      | Reusable record list, modal and UI helpers               |
-| `back-end/server.js`           | Express API, authorization, validation and rate limits   |
-| `back-end/security.js`         | Salted scrypt password hashing and file signatures       |
-| `back-end/db.js`               | Lazy database connection and idempotent schema bootstrap |
-| `api/index.js`                 | Vercel function entry point                              |
-| `tests/`                       | Security checks and end-to-end regression scripts        |
+| Path                            | Responsibility                                           |
+| ------------------------------- | -------------------------------------------------------- |
+| `front-end/src/App.jsx`         | Application shell, session bootstrap, routing            |
+| `front-end/src/Home.jsx`        | Public landing page                                      |
+| `front-end/src/AuthPage.jsx`    | Registration and login                                   |
+| `front-end/src/Dashboard.jsx`   | Patient and doctor workflows                             |
+| `front-end/src/UploadModal.jsx` | Upload form and validation feedback                      |
+| `front-end/src/shared.jsx`      | Reusable record list, modal and UI helpers               |
+| `back-end/server.js`            | Express API, authorization, validation and rate limits   |
+| `back-end/security.js`          | Salted scrypt password hashing and file signatures       |
+| `back-end/db.js`                | Lazy database connection and idempotent schema bootstrap |
+| `api/index.js`                  | Vercel function entry point                              |
+| `tests/`                        | Security checks and end-to-end regression scripts        |
 
 ## Run locally
 

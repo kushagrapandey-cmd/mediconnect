@@ -2091,3 +2091,8 @@ dialog > p {
     padding: 10px 12px;
   }
 }
+/* Keep decorative orbits inside the illustration at narrow widths. */
+.hero-art {
+  overflow: hidden;
+  min-width: 0;
+}

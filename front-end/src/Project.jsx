@@ -3,10 +3,10 @@ import { FiArrowUpRight } from "react-icons/fi";
 import { Footer } from "./shared";
 function Project() {
   const team = [
-    ["Kushagra Pandey", "Development", "kpimg.png"],
-    ["Arun Kumar Shukla", "Database", "arun.png"],
-    ["Prajjwal Kumar", "Interface design", "prajjwal.png"],
-    ["Prince Kumar Pal", "Backend", "prince.png"],
+    ["Kushagra Pandey", "Development", "kpimg.webp"],
+    ["Arun Kumar Shukla", "Database", "arun.webp"],
+    ["Prajjwal Kumar", "Interface design", "prajjwal.webp"],
+    ["Prince Kumar Pal", "Backend", "prince.webp"],
   ];
   return (
     <>

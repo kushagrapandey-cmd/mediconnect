@@ -1,4 +1,10 @@
-node_modules
+node_modules/
 .env
+.env.*
+!.env.example
 apikey.json
-uploads
+uploads/
+front-end/build/
+.vercel/
+coverage/
+test-results/

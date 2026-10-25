@@ -19,12 +19,20 @@ Patient registration/login → upload → patient-approved doctor access → dow
 - Registration, login, refresh persistence, dashboard navigation and sharing form rendered correctly in connected Chrome. The final Vite/React Router build rendered an API-seeded synthetic record correctly in the patient library.
 - Public home, approach, team and privacy navigation reviewed; team portraits loaded.
 - Desktop and 390 px mobile dashboard reviewed. A mobile homepage overflow from decorative circles was identified and fixed; all four workspace tabs are visible on mobile after refinement.
+- Browser search and category filters correctly show/hide an API-seeded record. Delete confirmation opens and can be cancelled without removing the record. Browser sign-out returns to login.
 - Upload modal opens, traps focus and closes with Escape. The synthetic PDF download works.
 - The browser extension blocked automated file selection because “Allow access to file URLs” is disabled locally. This is an automation limitation; file handling was verified independently through the deployed API. No claim is made that automated browser upload succeeded.
 
 ## Dependency scope
 
 The original Create React App tree contained numerous reported vulnerabilities. It was replaced with Vite; unused client libraries were removed. The server dependencies were updated to patched Express and Multer versions. Final `npm audit` checks report **0 known vulnerabilities** in both the frontend and root/server lockfiles (including development dependencies).
+
+## Production release
+
+- Merged PR #1 into `master`; Vercel production branch tracking is set to `master`.
+- Final Vite production deployment reached READY. Health, login, record listing and byte-exact PDF download passed after release.
+- Vercel runtime error scan: no errors found in the selected one-hour window.
+- Verified mobile homepage document width does not exceed the 390 px viewport.
 
 ## Honest limits
 

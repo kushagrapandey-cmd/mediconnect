@@ -50,7 +50,7 @@ For this bounded showcase, small files are stored as base64 content in the datab
 
 ## Run locally
 
-Requires Node.js 22 or later and a PostgreSQL database accessible via the Neon HTTP driver.
+Requires Node.js 24 and a PostgreSQL database accessible via the Neon HTTP driver.
 
 ```bash
 git clone https://github.com/kushagrapandey-cmd/mediconnect.git
@@ -69,7 +69,7 @@ The schema is created idempotently on the first API request. The server uses par
 ## Interview demo: 4–5 minutes
 
 1. In a normal window, register a patient with a synthetic name and test email.
-2. Upload two synthetic PDFs with the same filename but different titles. Search/filter and download each to demonstrate ID-based retrieval.
+2. From **Add a record**, download the included synthetic sample PDF. Upload it twice with the same filename but different titles. Search/filter and download each to demonstrate ID-based retrieval.
 3. In an incognito window, register a doctor. Copy the doctor code.
 4. Before permission is granted, look up the patient code: access must fail.
 5. From the patient window, open **Sharing & access** and grant access using the doctor code.

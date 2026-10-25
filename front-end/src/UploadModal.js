@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FiPlus, FiUploadCloud } from "react-icons/fi";
+import { FiPlus, FiUploadCloud, FiDownload } from "react-icons/fi";
 import { api, categories, Notice, Modal } from "./shared";
 function UploadModal({ onClose, onSaved }) {
   const [busy, setBusy] = useState(false),
@@ -28,6 +28,13 @@ function UploadModal({ onClose, onSaved }) {
           Keep the details together. Synthetic documents only.
         </p>
         <Notice error>{error}</Notice>
+        <a
+          className="text-link"
+          href="/assets/sample-record.pdf"
+          download="mediconnect-sample-record.pdf"
+        >
+          Download a synthetic sample record <FiDownload />
+        </a>
         <label className="dropzone">
           <FiUploadCloud />
           <strong>{file ? file.name : "Choose your document"}</strong>

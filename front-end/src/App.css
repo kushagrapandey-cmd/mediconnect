@@ -2081,3 +2081,13 @@ dialog > p {
     transition: none !important;
   }
 }
+@media (max-width: 760px) {
+  .sidebar nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow: visible;
+  }
+  .sidebar nav button {
+    padding: 10px 12px;
+  }
+}

@@ -1,0 +1,366 @@
+/* Shared surfaces keep every route and native dialog in the same theme. */
+:root {
+  color-scheme: light;
+  --page-text: #203c38;
+  --surface: #ffffff;
+  --surface-soft: #eff6f2;
+  --surface-hover: #e8f3ed;
+  --field: #ffffff;
+  --heading: #123e35;
+  --page-gradient: linear-gradient(
+    112deg,
+    #eaf6f0 0%,
+    #f8fbf8 48%,
+    #e8f2f8 100%
+  );
+  --action: #126653;
+  --action-hover: #0d503f;
+  --brand-deep: #123e35;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --green: #8edbc3;
+  --dark: #e3f2ec;
+  --heading: #e3f2ec;
+  --muted: #b0c7c3;
+  --line: #33504f;
+  --page-text: #deeee8;
+  --surface: #152e32;
+  --surface-soft: #1c383b;
+  --surface-hover: #254649;
+  --field: #10282d;
+  --page-gradient: linear-gradient(
+    112deg,
+    #102b29 0%,
+    #0e202b 52%,
+    #153638 100%
+  );
+  --action: #1b715b;
+  --action-hover: #21816a;
+  --brand-deep: #0c302d;
+}
+body {
+  background: var(--page-gradient);
+  color: var(--page-text);
+  min-height: 100vh;
+}
+.header-inner {
+  gap: 22px;
+}
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  order: 3;
+}
+.site-header nav {
+  margin-left: auto;
+}
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface-soft);
+  color: var(--heading);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.theme-toggle:hover {
+  background: var(--surface-hover);
+}
+.theme-toggle svg {
+  width: 14px;
+  height: 14px;
+}
+.site-header,
+footer,
+.feature,
+.health-card,
+.mini-card,
+.team-card,
+.auth-form-wrap,
+.sidebar,
+.stat-card,
+.panel,
+.role-switch .selected,
+.patient-row,
+dialog,
+.skip-link {
+  background: var(--surface);
+}
+.cta,
+.auth-story {
+  background: linear-gradient(130deg, var(--brand-deep), #174f47);
+}
+.brand-icon,
+.btn {
+  background: var(--action);
+  color: #fff;
+  border-color: var(--action);
+}
+.btn:hover {
+  background: var(--action-hover);
+}
+.btn.secondary {
+  background: var(--surface);
+  color: var(--heading);
+  border-color: var(--line);
+}
+.btn.secondary:hover {
+  background: var(--surface-hover);
+}
+.btn.light {
+  background: #fff;
+  color: #126653;
+  border-color: #fff;
+}
+.btn.destructive {
+  background: #ad3e3e;
+  border-color: #ad3e3e;
+}
+input,
+select {
+  background: var(--field);
+  color: var(--page-text);
+  border-color: var(--line);
+}
+.search input {
+  background: var(--field);
+}
+label,
+dialog {
+  color: var(--page-text);
+}
+.trust-strip,
+.info-panel,
+.sidebar-tip,
+.code-card,
+.workspace-banner,
+.dropzone,
+.table-head,
+.role-switch {
+  background: var(--surface-soft);
+  border-color: var(--line);
+}
+.sidebar nav button.active,
+.icon-btn:hover,
+.patient-row:hover {
+  background: var(--surface-hover);
+}
+@media (max-width: 1050px) {
+  .site-header nav {
+    gap: 18px;
+  }
+  .header-inner {
+    gap: 16px;
+  }
+}
+@media (max-width: 900px) and (min-width: 761px) {
+  .theme-toggle span {
+    display: none;
+  }
+  .theme-toggle {
+    padding: 9px;
+  }
+  .site-header nav {
+    gap: 12px;
+    font-size: 12px;
+  }
+}
+@media (max-width: 760px) {
+  .header-controls {
+    margin-left: auto;
+    gap: 7px;
+  }
+  .header-inner {
+    gap: 8px;
+  }
+  .theme-toggle {
+    font-size: 10px;
+    padding: 8px 10px;
+  }
+  .site-header nav {
+    background: var(--surface);
+    margin: 0;
+  }
+}
+/* Keep supporting text readable rather than applying a whole-page invert filter. */
+[data-theme="dark"] .site-header nav > a:not(.btn),
+[data-theme="dark"] .hero-benefits,
+[data-theme="dark"] .sample-record small,
+[data-theme="dark"] .mini-card small,
+[data-theme="dark"] .art-caption,
+[data-theme="dark"] .trust-strip,
+[data-theme="dark"] .trust-strip > span,
+[data-theme="dark"] .disclaimer,
+[data-theme="dark"] .footer-note,
+[data-theme="dark"] .password-field button,
+[data-theme="dark"] .form-footnote,
+[data-theme="dark"] .workspace-label,
+[data-theme="dark"] .sidebar nav button,
+[data-theme="dark"] .sidebar-tip > svg,
+[data-theme="dark"] .sidebar-tip p,
+[data-theme="dark"] .sidebar-bottom > .text-btn,
+[data-theme="dark"] .workspace-top > span:first-child,
+[data-theme="dark"] .code-card span,
+[data-theme="dark"] .code-card small,
+[data-theme="dark"] .stat-card > span:last-child,
+[data-theme="dark"] .panel-heading p,
+[data-theme="dark"] .search svg,
+[data-theme="dark"] .table-head,
+[data-theme="dark"] .record-title small,
+[data-theme="dark"] .record-date,
+[data-theme="dark"] .file-details,
+[data-theme="dark"] .file-details small,
+[data-theme="dark"] .empty-state,
+[data-theme="dark"] .empty-state > svg,
+[data-theme="dark"] .workspace-banner p,
+[data-theme="dark"] .workspace-footnote,
+[data-theme="dark"] .loading-state,
+[data-theme="dark"] .permission-row small,
+[data-theme="dark"] .activity-list p,
+[data-theme="dark"] .activity-list p span,
+[data-theme="dark"] .patient-row small,
+[data-theme="dark"] .patient-row > svg,
+[data-theme="dark"] .dropzone > span {
+  color: var(--muted);
+}
+[data-theme="dark"] .site-header nav > a.active,
+[data-theme="dark"] .sidebar nav button.active {
+  color: var(--green);
+}
+[data-theme="dark"] input::placeholder {
+  color: #a0b8b4;
+}
+[data-theme="dark"] .empty-state h3 {
+  color: var(--heading);
+}
+[data-theme="dark"] .icon-box,
+[data-theme="dark"] .record-icon,
+[data-theme="dark"] .empty-icon,
+[data-theme="dark"] .user-avatar,
+[data-theme="dark"] .steps-section li > span {
+  background: #244442;
+  color: #a3dbc6;
+}
+[data-theme="dark"] .peach,
+[data-theme="dark"] .r1 {
+  background: #443b29;
+  color: #e1c48b;
+}
+[data-theme="dark"] .r2 {
+  background: #293d50;
+  color: #b2d0e8;
+}
+[data-theme="dark"] .pill {
+  background: #24483e;
+  color: #b2dfc7;
+}
+[data-theme="dark"] .verified {
+  background: #315b47;
+  color: #c3e3c6;
+}
+[data-theme="dark"] .feature-number {
+  color: #7ba59a;
+}
+[data-theme="dark"] .sidebar nav span {
+  background: #355849;
+  color: #cae4d6;
+}
+[data-theme="dark"] .icon-btn {
+  color: #a5cbbc;
+}
+[data-theme="dark"] .icon-btn.danger {
+  color: #f0afa7;
+}
+[data-theme="dark"] .icon-btn.danger:hover {
+  background: #4a2e2e;
+  border-color: #79504c;
+}
+[data-theme="dark"] .hero-art {
+  background: radial-gradient(
+    ellipse at center,
+    #264b42 0,
+    #173234 50%,
+    transparent 70%
+  );
+}
+[data-theme="dark"] .orbit {
+  border-color: #406457;
+}
+[data-theme="dark"] .floating-plus {
+  color: #8bb9a3;
+}
+[data-theme="dark"] .pulse {
+  background: linear-gradient(0deg, #1d3f36, transparent);
+}
+[data-theme="dark"] .pulse path {
+  stroke: #91c9ab;
+}
+[data-theme="dark"] .sample-record,
+[data-theme="dark"] .record-row,
+[data-theme="dark"] .activity-list li,
+[data-theme="dark"] .patient-row {
+  border-color: var(--line);
+}
+[data-theme="dark"] .health-card {
+  border-color: var(--line);
+  box-shadow: 0 22px 60px #0003;
+}
+[data-theme="dark"] .notice {
+  background: #1c4033;
+  border-color: #46775d;
+  color: #d5ebdb;
+}
+[data-theme="dark"] .notice.error {
+  background: #422c2d;
+  border-color: #805452;
+  color: #ffd0c5;
+}
+[data-theme="dark"] dialog::backdrop {
+  background: #020e12b8;
+}
+[data-theme="dark"] ::selection {
+  background: #386654;
+  color: #fff;
+}
+@media (min-width: 761px) and (max-width: 980px) {
+  .menu-toggle {
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: none;
+    font-size: 23px;
+    width: 38px;
+    height: 38px;
+  }
+  .header-controls {
+    margin-left: auto;
+  }
+  .site-header nav {
+    display: none;
+    position: absolute;
+    top: 82px;
+    left: 0;
+    right: 0;
+    margin: 0;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    padding: 20px 36px;
+    gap: 14px;
+    align-items: stretch;
+  }
+  .site-header nav.open {
+    display: flex;
+    flex-direction: column;
+  }
+  .theme-toggle span {
+    display: inline;
+  }
+}

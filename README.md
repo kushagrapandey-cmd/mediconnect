@@ -1,5 +1,7 @@
 # MediConnect
 
+[Open the live website](https://mediconnect-psi-sand.vercel.app)
+
 **Patient-controlled health record sharing.** An academic full-stack project by Kushagra Pandey and team.
 
 MediConnect addresses fragmented medical documents: patients upload and organise their records, then explicitly grant a specific doctor time-limited read access. A patient code identifies an account; it does **not** authorize access.

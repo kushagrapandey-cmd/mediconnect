@@ -16,7 +16,7 @@ Patient registration/login → upload → patient-approved doctor access → dow
 
 ## Browser evidence
 
-- Registration, login, refresh persistence, dashboard navigation and sharing form rendered correctly in connected Chrome.
+- Registration, login, refresh persistence, dashboard navigation and sharing form rendered correctly in connected Chrome. The final Vite/React Router build rendered an API-seeded synthetic record correctly in the patient library.
 - Public home, approach, team and privacy navigation reviewed; team portraits loaded.
 - Desktop and 390 px mobile dashboard reviewed. A mobile homepage overflow from decorative circles was identified and fixed; all four workspace tabs are visible on mobile after refinement.
 - Upload modal opens, traps focus and closes with Escape. The synthetic PDF download works.
@@ -24,7 +24,7 @@ Patient registration/login → upload → patient-approved doctor access → dow
 
 ## Dependency scope
 
-The original Create React App tree contained numerous reported vulnerabilities. It was replaced with Vite; unused client libraries were removed. The server dependencies were updated to patched Express and Multer versions. Dependency audit results for the final lockfiles are recorded in the release verification.
+The original Create React App tree contained numerous reported vulnerabilities. It was replaced with Vite; unused client libraries were removed. The server dependencies were updated to patched Express and Multer versions. Final `npm audit` checks report **0 known vulnerabilities** in both the frontend and root/server lockfiles (including development dependencies).
 
 ## Honest limits
 

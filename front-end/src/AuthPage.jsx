@@ -9,7 +9,7 @@ import {
 } from "react-icons/fi";
 import { Auth, api, Notice } from "./shared";
 function AuthPage({ signup = false }) {
-  const { user, setUser } = useContext(Auth);
+  const { user, setUser, setRecoveryKey } = useContext(Auth);
   const nav = useNavigate();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -27,6 +27,7 @@ function AuthPage({ signup = false }) {
         body: JSON.stringify({ ...values, role }),
       });
       setUser(d.user);
+      if (d.recoveryKey) setRecoveryKey(d.recoveryKey);
       nav("/dashboard");
     } catch (e) {
       setError(e.message);
@@ -162,8 +163,7 @@ function AuthPage({ signup = false }) {
           </p>
           {!signup && (
             <small className="muted">
-              Password recovery is not available in this showcase. Use a
-              memorable test password.
+              <Link to="/recover">Forgot your password? Recover your account</Link>
             </small>
           )}
           <div className="form-footnote">

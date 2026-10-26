@@ -172,7 +172,7 @@ class Client {
   ok("Future date rejected", () => assert.equal(r.status, 400));
   r = await upload(p, "Invalid date", bytes1, "application/pdf", "2026-02-31");
   ok("Impossible date rejected", () => assert.equal(r.status, 400));
-  r = await p.request("/grants", "POST", { code: d.user.code });
+  r = await p.request("/grants", "POST", { code: d.user.code, recordIds: [first.id,second.id], hours: 24 });
   ok("Patient grants doctor access", () =>
     assert.equal(r.status, 201, JSON.stringify(r.data)),
   );
@@ -216,7 +216,7 @@ class Client {
   r = await p.request(
     "/grants",
     "POST",
-    { code: d.user.code },
+    { code: d.user.code, recordIds: [first.id,second.id], hours: 24 },
     { Origin: "https://unrelated.example" },
   );
   ok("Cross-origin mutation rejected", () => assert.equal(r.status, 403));

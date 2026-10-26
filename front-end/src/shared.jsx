@@ -5,6 +5,8 @@ import {
   FiArrowRight,
   FiCheckCircle,
   FiDownload,
+  FiEye,
+  FiEdit2,
   FiFileText,
   FiFolder,
   FiSearch,
@@ -132,7 +134,7 @@ function Modal({ title, children, onClose }) {
     </dialog>
   );
 }
-function Records({ records, canDelete, onDelete, onDownload }) {
+function Records({ records, canDelete, onDelete, onDownload, onPreview, onEdit }) {
   const [search, setSearch] = useState(""),
     [cat, setCat] = useState("All records");
   const list = records.filter(
@@ -194,6 +196,8 @@ function Records({ records, canDelete, onDelete, onDownload }) {
                 <small>{Math.max(1, Math.round(r.size / 1024))} KB</small>
               </span>
               <div className="record-actions">
+                {onPreview && <button className="icon-btn" title="Preview document" aria-label={"Preview " + r.title} onClick={() => onPreview(r)}><FiEye /></button>}
+                {onEdit && <button className="icon-btn" title="Edit document details" aria-label={"Edit " + r.title} onClick={() => onEdit(r)}><FiEdit2 /></button>}
                 <button
                   className="icon-btn"
                   title="Download document"

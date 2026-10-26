@@ -38,11 +38,6 @@ The original Create React App tree contained numerous reported vulnerabilities. 
 
 No test suite proves a website has zero bugs. Natural 24-hour permission expiration was not waited out; the database expiration condition is implemented, while immediate revocation was exercised. No full WCAG audit, penetration test, load test or clinical validation was performed. This is an academic prototype, not a certified medical system. See the README for unimplemented features and deployment tradeoffs.
 
-## Theme and documentation update
+## Current consent and account update
 
-- Scope: persistent light/dark switch, static gradients, full user walkthrough, engineering/contribution guides and future/business planning. No backend/API behaviour changed in this update; the 40 API checks above describe the prior core-flow verification, not a newly rerun suite.
-- Vite production build passed: approximately 71.7 KB JS gzip and 8.0 KB CSS gzip; no new runtime dependency or animated background.
-- Early-theme initializer exercised with saved dark/light values, system-dark default, invalid saved value and blocked storage; all five checks passed.
-- Connected Chrome: first system-dark render, switch to light, reload persistence, route persistence, and cross-tab synchronisation checked. Dark signup, patient dashboard and upload dialog visually reviewed.
-- Responsive checks at 768 px and 360 px: tablet menu and always-visible theme switch worked; mobile homepage/document width did not exceed the viewport in dark mode.
-- Relative links in README/guide documents checked: no missing local targets. Original-versus-assisted attribution explicitly disclosed; business prices/revenue are labelled hypotheses.
+Production build and the four existing security tests pass locally. New consent/account end-to-end checks are pending; historical results above do not validate the new routes.

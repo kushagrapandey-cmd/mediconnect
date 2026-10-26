@@ -15,6 +15,7 @@ import {
   FiUsers,
   FiX,
   FiCopy,
+  FiSettings,
 } from "react-icons/fi";
 import {
   Auth,
@@ -25,9 +26,14 @@ import {
   Records,
   PatientList,
 } from "./shared";
+import Account, { RecoveryKey } from "./Account";
+import Sharing from "./Sharing";
+import { RecordPreview, RecordEdit } from "./RecordTools";
 import UploadModal from "./UploadModal";
 function Dashboard() {
-  const { user, loading, logout } = useContext(Auth);
+  const { user, loading, logout, recoveryKey, setRecoveryKey } = useContext(Auth);
+  const [requests, setRequests] = useState([]);
+  const [preview, setPreview] = useState(null), [editing, setEditing] = useState(null);
   const [tab, setTab] = useState("overview");
   const [records, setRecords] = useState([]),
     [grants, setGrants] = useState([]),
@@ -43,21 +49,23 @@ function Dashboard() {
   const patient = user?.role === "patient";
   const refresh = useCallback(async () => {
     if (!user) return;
-    setBusy(true);
     setError("");
     try {
       if (user.role === "patient") {
-        const [r, g, a] = await Promise.all([
+        const [r, g, a, req] = await Promise.all([
           api("/records"),
           api("/grants"),
           api("/activity"),
+          api("/access-requests"),
         ]);
         setRecords(r.records);
         setGrants(g.grants);
         setActivity(a.activity);
+        setRequests(req.requests);
       } else {
-        const d = await api("/patients");
+        const [d, r] = await Promise.all([api("/patients"), api("/access-requests")]);
         setPatients(d.patients);
+        setRequests(r.requests);
       }
     } catch (e) {
       setError(e.message);
@@ -108,37 +116,6 @@ function Dashboard() {
       setActionBusy(false);
     }
   }
-  async function share(e) {
-    e.preventDefault();
-    const f = e.currentTarget;
-    setActionBusy(true);
-    setError("");
-    try {
-      await api("/grants", {
-        method: "POST",
-        body: JSON.stringify({ code: new FormData(f).get("code") }),
-      });
-      f.reset();
-      setMessage("Doctor access granted for 24 hours.");
-      await refresh();
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setActionBusy(false);
-    }
-  }
-  async function revoke(code) {
-    setActionBusy(true);
-    try {
-      await api("/grants/" + code, { method: "DELETE" });
-      setMessage("Doctor access revoked.");
-      await refresh();
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setActionBusy(false);
-    }
-  }
   async function lookup(code) {
     setError("");
     setBusy(true);
@@ -165,10 +142,13 @@ function Dashboard() {
         ["records", "My records", FiFolder],
         ["sharing", "Sharing & access", FiUsers],
         ["activity", "Activity", FiClock],
+        ["account", "Account", FiSettings],
       ]
     : [
         ["overview", "Overview", FiGrid],
         ["patients", "Shared patients", FiUsers],
+        ["sharing", "Access requests", FiShield],
+        ["account", "Account", FiSettings],
       ];
   return (
     <main className="workspace" id="main">
@@ -284,12 +264,12 @@ function Dashboard() {
                     ? [
                         [FiFolder, records.length, "Records in your library"],
                         [FiUsers, grants.length, "Doctors with access"],
-                        [FiClock, "24h", "Sharing permission window"],
+                        [FiClock, "1h–7d", "Patient-chosen access window"],
                       ]
                     : [
                         [FiUsers, patients.length, "Patients sharing with you"],
                         [FiShield, "Consent", "Required for every patient"],
-                        [FiClock, "24h", "Time-limited access"],
+                        [FiClock, "Scoped", "Only approved documents"],
                       ]
                   ).map(([Icon, n, t]) => (
                     <article className="stat-card" key={t}>
@@ -328,6 +308,8 @@ function Dashboard() {
                       canDelete
                       onDelete={setDeleting}
                       onDownload={download}
+                      onPreview={setPreview}
+                      onEdit={patient ? setEditing : undefined}
                     />
                   ) : (
                     <PatientList patients={patients} onSelect={lookup} />
@@ -375,75 +357,13 @@ function Dashboard() {
                   canDelete
                   onDelete={setDeleting}
                   onDownload={download}
+                      onPreview={setPreview}
+                      onEdit={patient ? setEditing : undefined}
                 />
               </div>
             )}
-            {tab === "sharing" && (
-              <>
-                <div className="panel share-panel">
-                  <span className="icon-box">
-                    <FiUsers />
-                  </span>
-                  <h2>Connect with your doctor.</h2>
-                  <p>
-                    Ask your doctor for their code. Grant them read and download
-                    access to your complete library for 24 hours, including new
-                    records. You can revoke it at any time.
-                  </p>
-                  <form className="inline-form" onSubmit={share}>
-                    <label>
-                      Doctor code
-                      <input
-                        name="code"
-                        placeholder="10-character doctor code"
-                        pattern="[a-fA-F0-9]{10}"
-                        maxLength={10}
-                        required
-                      />
-                    </label>
-                    <button className="btn" disabled={actionBusy}>
-                      Grant access <FiArrowRight />
-                    </button>
-                  </form>
-                  <small className="muted">
-                    A revoked permission cannot recall copies already
-                    downloaded.
-                  </small>
-                </div>
-                <div className="panel">
-                  <div className="panel-heading">
-                    <h2>Active permissions</h2>
-                  </div>
-                  {grants.length ? (
-                    grants.map((g) => (
-                      <div className="permission-row" key={g.code}>
-                        <span className="user-avatar">{initials(g.name)}</span>
-                        <div>
-                          <strong>{g.name}</strong>
-                          <small>
-                            {g.email} · Expires{" "}
-                            {new Date(g.expires_at).toLocaleString("en-IN")}
-                          </small>
-                        </div>
-                        <button
-                          className="btn secondary small"
-                          disabled={actionBusy}
-                          onClick={() => revoke(g.code)}
-                        >
-                          Revoke access
-                        </button>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="empty-state">
-                      <FiShield />
-                      <h3>Your records are just yours.</h3>
-                      <p>No doctors have active access.</p>
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
+            {tab === "account" && <Account />}
+            {tab === "sharing" && <Sharing patient={patient} records={records} grants={grants} requests={requests} onRefresh={refresh} onMessage={setMessage} />}
             {tab === "activity" && (
               <div className="panel">
                 <div className="panel-heading">
@@ -488,8 +408,7 @@ function Dashboard() {
                     <div>
                       <h2>Find shared records</h2>
                       <p>
-                        A patient must grant permission using your doctor code
-                        first.
+                        Only patient-approved records are available. To ask for access, open Access requests.
                       </p>
                     </div>
                   </div>
@@ -534,7 +453,9 @@ function Dashboard() {
                         Close library <FiX />
                       </button>
                     </div>
-                    <Records records={records} onDownload={download} />
+                    <Records records={records} onDownload={download}
+                      onPreview={setPreview}
+                      onEdit={patient ? setEditing : undefined} />
                   </div>
                 )}
               </>
@@ -546,6 +467,9 @@ function Dashboard() {
           <Link to="/privacy">Showcase limitations</Link>
         </div>
       </section>
+      {recoveryKey && <RecoveryKey value={recoveryKey} onClose={() => setRecoveryKey("")} />}
+      {preview && <RecordPreview record={preview} onClose={() => setPreview(null)} />}
+      {editing && <RecordEdit record={editing} onClose={() => setEditing(null)} onSaved={() => {setEditing(null);setMessage("Document details updated.");refresh();}} />}
       {upload && (
         <UploadModal
           onClose={() => setUpload(false)}

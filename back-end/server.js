@@ -21,6 +21,7 @@ app.use(
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", "data:"],
+        frameSrc: ["'self'"],
         connectSrc: ["'self'"],
         objectSrc: ["'none'"],
         frameAncestors: ["'none'"],
@@ -52,6 +53,7 @@ const safeUser = (u) => ({
   email: u.email,
   role: u.role,
   code: u.code,
+  emailVerified: u.email_verified,
 });
 const uuid = (x) =>
   /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(
@@ -83,10 +85,10 @@ const clientKey = (req) =>
   req.headers["x-vercel-forwarded-for"] ||
   req.socket.remoteAddress ||
   "unknown";
-async function session(res, u) {
+async function session(res, u, req) {
   const token = randomBytes(32).toString("hex");
   await getSql()`DELETE FROM mc_sessions WHERE expires_at < now()`;
-  await getSql()`INSERT INTO mc_sessions(token,user_id,expires_at) VALUES (${digest(token)},${u.id},now()+interval '7 days')`;
+  await getSql()`INSERT INTO mc_sessions(token,user_id,expires_at,device) VALUES (${digest(token)},${u.id},now()+interval '7 days',${String(req?.headers["user-agent"] || "Browser session").slice(0,180)})`;
   res.cookie("mc_session", token, {
     httpOnly: true,
     secure: !!process.env.VERCEL,
@@ -104,10 +106,11 @@ app.post(
     const { name, password, role } = req.body,
       email = req.body.email.trim().toLowerCase();
     const q = getSql();
+    const recoveryKey = randomBytes(24).toString("hex");
     const [user] =
-      await q`INSERT INTO mc_users(id,name,email,password,role,code) VALUES (${randomUUID()},${name.trim()},${email},${await hashPassword(password)},${role},${randomBytes(5).toString("hex").toUpperCase()}) RETURNING *`;
-    await session(res, user);
-    res.status(201).json({ user: safeUser(user) });
+      await q`INSERT INTO mc_users(id,name,email,password,role,code,recovery_hash) VALUES (${randomUUID()},${name.trim()},${email},${await hashPassword(password)},${role},${randomBytes(5).toString("hex").toUpperCase()},${digest(recoveryKey)}) RETURNING *`;
+    await session(res, user, req);
+    res.status(201).json({ user: safeUser(user), recoveryKey });
   }),
 );
 app.post(
@@ -129,7 +132,7 @@ app.post(
       u?.password || `00000000000000000000000000000000:${"0".repeat(128)}`;
     if (!(await verifyPassword(password, stored)) || !u)
       throw fail(401, "Email or password is incorrect.");
-    await session(res, u);
+    await session(res, u, req);
     res.json({ user: safeUser(u) });
   }),
 );
@@ -148,7 +151,10 @@ const auth = wrap(async (req, res, next) => {
   req.sessionHash = digest(token);
   next();
 });
+const accountTools = require("./accounts")({ wrap, fail, limit, safeUser, auth });
+app.use("/api", accountTools.publicRoutes);
 app.use("/api", auth);
+app.use("/api", accountTools.privateRoutes);
 app.get("/api/auth/me", (req, res) => res.json({ user: safeUser(req.user) }));
 app.post(
   "/api/auth/logout",
@@ -252,29 +258,31 @@ app.post(
     res.status(201).json({ record });
   }),
 );
-async function canRead(u, owner) {
-  if (u.id === owner) return true;
-  if (u.role !== "doctor") return false;
-  return (
-    (
-      await getSql()`SELECT 1 FROM mc_grants WHERE patient_id=${owner} AND doctor_id=${u.id} AND expires_at>now()`
-    ).length > 0
-  );
-}
-app.get(
-  "/api/records/:id/download",
+// List and bytes use the same scope predicate; every read checks live consent.
+const scopePredicate = `EXISTS (SELECT 1 FROM mc_grants g WHERE g.patient_id=r.owner_id AND g.doctor_id=$2 AND g.expires_at>now() AND (g.record_ids IS NULL OR g.record_ids ? r.id::text))`;
+for (const mode of ["preview", "download"]) app.get(
+  `/api/records/:id/${mode}`,
   wrap(async (req, res) => {
     if (!uuid(req.params.id)) throw fail(404, "Document not found.");
-    const [r] =
-      await getSql()`SELECT * FROM mc_records WHERE id=${req.params.id}`;
-    if (!r || !(await canRead(req.user, r.owner_id)))
-      throw fail(404, "Document not found or access has expired.");
-    await audit(r.owner_id, req.user.name, `Downloaded ${r.title}`);
+    const [r] = await getSql().query(`SELECT r.* FROM mc_records r WHERE r.id=$1 AND (r.owner_id=$2 OR ($3='doctor' AND ${scopePredicate}))`, [req.params.id,req.user.id,req.user.role]);
+    if (!r) throw fail(404, "Document not found or access has expired.");
+    await audit(r.owner_id, req.user.name, `${mode === "preview" ? "Previewed" : "Downloaded"} ${r.title}`);
     res.type(r.mime);
-    res.attachment(r.filename);
+    res.set("Content-Disposition", `${mode === "preview" ? "inline" : "attachment"}; filename="${r.filename.replace(/["\\\r\n]/g, "_")}"`);
     res.send(Buffer.from(r.content, "base64"));
   }),
 );
+app.patch("/api/records/:id", patient, wrap(async (req,res) => {
+  const { validateRecord } = require("./validation");
+  const error = validateRecord(req.body);
+  if (error) throw fail(400,error);
+  if (!uuid(req.params.id)) throw fail(404,"Document not found.");
+  const {title,category,recordDate} = req.body;
+  const [record] = await getSql().query(`UPDATE mc_records SET title=$1,category=$2,record_date=$3 WHERE id=$4 AND owner_id=$5 RETURNING ${metadata}`, [title.trim(),category,recordDate,req.params.id,req.user.id]);
+  if (!record) throw fail(404,"Document not found.");
+  await audit(req.user.id,req.user.name,`Updated ${record.title}`);
+  res.json({record});
+}));
 app.delete(
   "/api/records/:id",
   patient,
@@ -287,77 +295,7 @@ app.delete(
     res.json({ ok: true });
   }),
 );
-app.get(
-  "/api/grants",
-  patient,
-  wrap(async (req, res) => {
-    res.json({
-      grants:
-        await getSql()`SELECT u.name,u.email,u.code,g.expires_at FROM mc_grants g JOIN mc_users u ON u.id=g.doctor_id WHERE g.patient_id=${req.user.id} AND g.expires_at>now() ORDER BY g.expires_at DESC`,
-    });
-  }),
-);
-app.post(
-  "/api/grants",
-  patient,
-  wrap(async (req, res) => {
-    const code = String(req.body.code || "")
-      .trim()
-      .toUpperCase();
-    if (!/^[A-F0-9]{10}$/.test(code))
-      throw fail(400, "Enter the 10-character doctor code.");
-    await limit(`grant:${req.user.id}`, 20);
-    const [d] =
-      await getSql()`SELECT * FROM mc_users WHERE code=${code} AND role='doctor'`;
-    if (!d) throw fail(404, "No doctor found with that code.");
-    await getSql()`INSERT INTO mc_grants(patient_id,doctor_id,expires_at) VALUES (${req.user.id},${d.id},now()+interval '24 hours') ON CONFLICT(patient_id,doctor_id) DO UPDATE SET expires_at=excluded.expires_at`;
-    await audit(
-      req.user.id,
-      req.user.name,
-      `Granted 24-hour access to ${d.name}`,
-    );
-    res.status(201).json({ ok: true });
-  }),
-);
-app.delete(
-  "/api/grants/:code",
-  patient,
-  wrap(async (req, res) => {
-    await getSql()`DELETE FROM mc_grants WHERE patient_id=${req.user.id} AND doctor_id IN (SELECT id FROM mc_users WHERE code=${req.params.code})`;
-    await audit(req.user.id, req.user.name, "Revoked doctor access");
-    res.json({ ok: true });
-  }),
-);
-app.get(
-  "/api/patients",
-  doctor,
-  wrap(async (req, res) => {
-    res.json({
-      patients:
-        await getSql()`SELECT u.name,u.code,g.expires_at FROM mc_grants g JOIN mc_users u ON u.id=g.patient_id WHERE g.doctor_id=${req.user.id} AND g.expires_at>now() ORDER BY u.name`,
-    });
-  }),
-);
-app.get(
-  "/api/patients/:code/records",
-  doctor,
-  wrap(async (req, res) => {
-    await limit(`lookup:${req.user.id}`, 60);
-    const [p] =
-      await getSql()`SELECT * FROM mc_users WHERE code=${req.params.code.toUpperCase()} AND role='patient'`;
-    if (!p || !(await canRead(req.user, p.id)))
-      throw fail(
-        404,
-        "Patient not found or sharing permission has not been granted.",
-      );
-    const records = await getSql().query(
-      `SELECT ${metadata} FROM mc_records WHERE owner_id=$1 ORDER BY record_date DESC,created_at DESC`,
-      [p.id],
-    );
-    await audit(p.id, req.user.name, "Viewed shared records");
-    res.json({ patient: { name: p.name, code: p.code }, records });
-  }),
-);
+app.use("/api", require("./sharing")({wrap,fail,limit,patient,doctor,audit,uuid,metadata}));
 app.get(
   "/api/activity",
   patient,

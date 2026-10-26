@@ -17,6 +17,7 @@ import Privacy from "./Privacy";
 import AuthPage from "./AuthPage";
 import Dashboard from "./Dashboard";
 import NotFound from "./NotFound";
+import { AccountAction, RecoveryPage } from "./Account";
 import ThemeToggle from "./ThemeToggle";
 import "./App.css";
 import "./theme.css";
@@ -76,6 +77,7 @@ function Header() {
   );
 }
 export default function App() {
+  const [recoveryKey, setRecoveryKey] = useState("");
   const [user, setUser] = useState(null),
     [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -94,7 +96,7 @@ export default function App() {
     }
   }
   return (
-    <Auth.Provider value={{ user, setUser, loading, logout }}>
+    <Auth.Provider value={{ user, setUser, loading, logout, recoveryKey, setRecoveryKey }}>
       <BrowserRouter>
         <ScrollReset />
         <a href="#main" className="skip-link">
@@ -108,6 +110,8 @@ export default function App() {
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/registration" element={<AuthPage signup />} />
           <Route path="/user-login" element={<AuthPage />} />
+          <Route path="/recover" element={<RecoveryPage />} />
+          <Route path="/account-action" element={<AccountAction />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route
             path="/patient-dashboard"

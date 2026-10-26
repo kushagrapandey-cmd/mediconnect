@@ -40,4 +40,11 @@ No test suite proves a website has zero bugs. Natural 24-hour permission expirat
 
 ## Current consent and account update
 
-Production build and the four existing security tests pass locally. New consent/account end-to-end checks are pending; historical results above do not validate the new routes.
+Verified 26 October 2026 using synthetic data on the feature preview with the existing dedicated Neon database.
+
+- 6 unit/security tests and the Vite production build pass.
+- 40 core API regression checks pass.
+- 49 consent/account checks pass: explicit scope, pending/denied requests, non-owner/self-approval denial, unselected/new-file isolation, authenticated preview and same-origin framing headers, record editing ownership/date validation, revocation, profile changes, session metadata, logout-all, recovery-key rejection/rotation/replay protection, password reset/change and session invalidation.
+- Test documents were removed; synthetic accounts and application history remain.
+- Public navigation and recovery page were inspected in the cloud browser. Authenticated workflows were tested through the API; no claim of full browser automation is made.
+- Email sending remains unconfigured. Natural expiry was not waited out. No real UHI/ABDM integration was performed.

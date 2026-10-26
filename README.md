@@ -53,7 +53,7 @@ flowchart TD
   D --> G[Expiring grants and activity]
 ```
 
-The original project used local MongoDB, Google Drive and Create React App. The obsolete build toolchain was replaced by Vite without changing the React framework. The deployed revision retains **React and Express**, and uses a dedicated free Neon PostgreSQL database through the user's existing Vercel integration. No existing MongoDB data is migrated or deleted. Do not describe this revision as MERN: it is React + Express + PostgreSQL.
+The original project used local MongoDB, Google Drive and Create React App. The obsolete build toolchain was replaced by Vite without changing the React framework. The deployed revision retains **React and Express**, and uses a dedicated free Neon PostgreSQL database through the Vercel integration. No existing MongoDB data is migrated or deleted. The current stack is React + Express + PostgreSQL.
 
 For this bounded showcase, small files are stored as base64 content in the database. This avoids public medical file URLs and an additional storage service. Base64 adds approximately 33% storage overhead; a larger deployment should stream files from private object storage and retain metadata in the database.
 

@@ -17,7 +17,9 @@ import Privacy from "./Privacy";
 import AuthPage from "./AuthPage";
 import Dashboard from "./Dashboard";
 import NotFound from "./NotFound";
+import ThemeToggle from "./ThemeToggle";
 import "./App.css";
+import "./theme.css";
 function ScrollReset() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -34,14 +36,17 @@ function Header() {
     <header className="site-header">
       <div className="header-inner">
         <Brand />
-        <button
-          className="menu-toggle"
-          aria-label="Toggle navigation"
-          aria-expanded={open}
-          onClick={() => setOpen(!open)}
-        >
-          {open ? <FiX /> : <FiMenu />}
-        </button>
+        <div className="header-controls">
+          <ThemeToggle />
+          <button
+            className="menu-toggle"
+            aria-label="Toggle navigation"
+            aria-expanded={open}
+            onClick={() => setOpen(!open)}
+          >
+            {open ? <FiX /> : <FiMenu />}
+          </button>
+        </div>
         <nav aria-label="Main navigation" className={open ? "open" : ""}>
           <NavLink to="/" end>
             Home

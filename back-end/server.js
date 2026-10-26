@@ -151,7 +151,7 @@ const auth = wrap(async (req, res, next) => {
   req.sessionHash = digest(token);
   next();
 });
-const accountTools = require("./accounts")({ wrap, fail, limit, safeUser, auth });
+const accountTools = require("./accounts")({ wrap, fail, limit, safeUser, clientKey });
 app.use("/api", accountTools.publicRoutes);
 app.use("/api", auth);
 app.use("/api", accountTools.privateRoutes);
@@ -268,6 +268,11 @@ for (const mode of ["preview", "download"]) app.get(
     if (!r) throw fail(404, "Document not found or access has expired.");
     await audit(r.owner_id, req.user.name, `${mode === "preview" ? "Previewed" : "Downloaded"} ${r.title}`);
     res.type(r.mime);
+    if (mode === "preview") {
+      // Permit the authenticated same-origin preview while blocking other sites.
+      res.set("Content-Security-Policy", "default-src 'none'; frame-ancestors 'self'");
+      res.set("X-Frame-Options", "SAMEORIGIN");
+    }
     res.set("Content-Disposition", `${mode === "preview" ? "inline" : "attachment"}; filename="${r.filename.replace(/["\\\r\n]/g, "_")}"`);
     res.send(Buffer.from(r.content, "base64"));
   }),

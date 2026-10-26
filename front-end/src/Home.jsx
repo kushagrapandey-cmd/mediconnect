@@ -153,7 +153,7 @@ function Home() {
                 FiShield,
                 "02",
                 "Share with confidence",
-                "Give a specific doctor read access for 24 hours. Revoke permission whenever you choose.",
+                "Choose the documents and access duration for a specific doctor. Revoke permission whenever you choose.",
               ],
               [
                 FiActivity,

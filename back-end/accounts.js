@@ -16,13 +16,13 @@ async function deliver(to,kind,token){
   });
   if(!response.ok)throw new Error('MAIL_DELIVERY_FAILED');
 }
-module.exports=({wrap,fail,limit,safeUser,auth})=>{
+module.exports=({wrap,fail,limit,safeUser,clientKey})=>{
   const publicRoutes=express.Router(),privateRoutes=express.Router();
   publicRoutes.get('/auth/options',(req,res)=>res.json({emailDelivery:mailReady(),recoveryKey:true}));
   publicRoutes.post('/auth/recover',wrap(async(req,res)=>{
     const {email,recoveryKey,password}=req.body;
     if(!emailOK(email)||typeof recoveryKey!=='string'||!/^[a-f0-9]{48}$/.test(recoveryKey)||!passwordOK(password))throw fail(400,'Enter your email, 48-character recovery key and a new password of 10–128 characters.');
-    await limit(`recover:${req.socket.remoteAddress}`,10);await limit(`recover-email:${email.trim().toLowerCase()}`,5);
+    await limit(`recover:${clientKey(req)}`,10);await limit(`recover-email:${email.trim().toLowerCase()}`,5);
     const key=randomBytes(24).toString('hex'),hash=await hashPassword(password);
     const [u]=await getSql()`WITH changed AS (UPDATE mc_users SET password=${hash},recovery_hash=${digest(key)} WHERE email=${email.trim().toLowerCase()} AND recovery_hash=${digest(recoveryKey)} RETURNING id), cleared AS (DELETE FROM mc_sessions WHERE user_id IN (SELECT id FROM changed)) SELECT id FROM changed`;
     if(!u)throw fail(400,'Email or recovery key is incorrect.');
@@ -33,7 +33,7 @@ module.exports=({wrap,fail,limit,safeUser,auth})=>{
     if(!mailReady())throw fail(503,'Email recovery is not configured. Use your saved recovery key.');
     if(!emailOK(req.body.email))throw fail(400,'Enter a valid email address.');
     const email=req.body.email.trim().toLowerCase();
-    await limit(`forgot:${req.socket.remoteAddress}`,10);await limit(`forgot-email:${email}`,3);
+    await limit(`forgot:${clientKey(req)}`,10);await limit(`forgot-email:${email}`,3);
     const [u]=await getSql()`SELECT id,email FROM mc_users WHERE email=${email} AND email_verified=true`;
     if(u){
       const token=randomBytes(32).toString('hex');
@@ -46,7 +46,7 @@ module.exports=({wrap,fail,limit,safeUser,auth})=>{
   publicRoutes.post('/auth/complete',wrap(async(req,res)=>{
     const {token,kind,password}=req.body;
     if(typeof token!=='string'||!/^[a-f0-9]{64}$/.test(token)||!['verify','reset'].includes(kind))throw fail(400,'Invalid account link.');
-    await limit(`complete:${req.socket.remoteAddress}`,20);
+    await limit(`complete:${clientKey(req)}`,20);
     if(kind==='reset'&&!passwordOK(password))throw fail(400,'Use a password between 10 and 128 characters.');
     const key=randomBytes(24).toString('hex');
     const q=getSql(),hash=kind==='reset'?await hashPassword(password):null;

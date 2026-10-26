@@ -24,16 +24,18 @@ function Privacy() {
           <h3>How sharing works</h3>
           <p>
             Records are private to their owner by default. A patient can grant a
-            specific doctor 24-hour read access to their whole library,
-            including new uploads. Revoking access blocks future requests; it
+            specific doctor access to selected documents for 1 hour to 7 days.
+            New uploads remain private. Legacy whole-library permissions remain
+            labelled until expiry or revocation. Revoking access blocks future requests; it
             cannot recall a downloaded copy.
           </p>
           <h3>Practical limits</h3>
           <p>
             Up to 30 documents per patient; PDF, JPEG or PNG files up to 2 MB
             each. Doctor registration is not independently verified. Email
-            verification, password recovery, clinical validation, regulatory
-            certification and government interoperability are not implemented.
+            delivery is not configured; password recovery is available with a saved
+            recovery key. Clinical validation, regulatory certification and
+            government interoperability are not implemented.
           </p>
           <h3>Deleting a record</h3>
           <p>

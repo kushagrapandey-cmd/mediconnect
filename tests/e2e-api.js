@@ -20,7 +20,7 @@ class Client {
     const res = await fetch(base + "/api" + path, {
       method,
       headers: {
-        ...(this.cookie ? { cookie: this.cookie } : {}),
+        ...((this.cookie || process.env.TEST_ACCESS_COOKIE) ? { cookie: [process.env.TEST_ACCESS_COOKIE, this.cookie].filter(Boolean).join("; ") } : {}),
         ...(body && !isForm ? { "Content-Type": "application/json" } : {}),
         ...headers,
       },

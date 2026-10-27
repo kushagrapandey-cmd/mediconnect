@@ -41,7 +41,7 @@ async function upstream(url, options = {}, timeout = 12000) {
     const res = await fetch(url, {...options, headers:{'User-Agent':USER_AGENT,Accept:'application/json',...options.headers}, signal:AbortSignal.timeout(timeout)});
     if (!res.ok) { console.warn('Map upstream returned', res.status); throw new Error('UPSTREAM'); }
     return await res.json();
-  } catch { throw error(503, 'The map search service is busy. Please try again shortly.'); }
+  } catch (e) { console.warn('Map upstream failure', e.name, e.cause?.code || ''); throw error(503, 'The map search service is busy. Please try again shortly.'); }
 }
 // Durable cache and provider gates are shared by all Vercel instances.
 let ready;
@@ -88,7 +88,9 @@ module.exports = ({wrap, limit, clientKey}) => {
     const result = await cached(`nearby:${lat}:${lon}:${radius}`,3600,async()=>{
       await gate('overpass',3);
       const query = `[out:json][timeout:15][maxsize:8388608];(nwr["amenity"~"^(hospital|clinic|doctors|dentist|pharmacy)$"](around:${radius*1000},${lat},${lon});nwr["healthcare"~"^(hospital|clinic|doctor|dentist|pharmacy)$"](around:${radius*1000},${lat},${lon}););out center tags;`;
-      const data = await upstream(process.env.OVERPASS_URL || 'https://overpass.private.coffee/api/interpreter',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({data:query})},20000);
+      const endpoint = new URL(process.env.OVERPASS_URL || 'https://overpass.private.coffee/api/interpreter');
+      endpoint.searchParams.set('data',query);
+      const data = await upstream(endpoint,{},20000);
       if (!Array.isArray(data.elements) || data.remark) throw error(503,'Hospital search could not finish. Try a smaller radius.');
       return {center:{lat,lon},facilities:facilities(data.elements,lat,lon,radius),limited:data.elements.length>=80};
     });

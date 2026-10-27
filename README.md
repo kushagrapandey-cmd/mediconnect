@@ -37,6 +37,10 @@ Patients can also initiate sharing by entering a doctor's code, reviewing the re
 
 The patient Activity tab shows the latest 30 record and permission events. Light/dark mode follows the system initially and saves a manual preference in the browser. Both themes use static gradients.
 
+## Contact and feedback
+
+The homepage footer links to Kushagra Pandey’s LinkedIn, GitHub and email. Visitors can submit project feedback without signing in; optional reply details and the message are emailed to the maintainer. The endpoint validates input, limits requests and fixes the recipient server-side. It stores no feedback messages in PostgreSQL. Set `FEEDBACK_RESEND_API_KEY` on the server; `FEEDBACK_MAIL_FROM` can specify a verified sender. Account email delivery is configured separately. Do not submit medical information through the form.
+
 ## Project scope
 
 MediConnect is a UHI-inspired academic prototype focused on connected patient/doctor workflows and explicit patient approval. Local account codes and permissions are not ABHA identifiers or ABDM consent artefacts. No UHI or ABDM network API is connected. There is no booking, billing, clinical advice or verified practitioner registry integration.

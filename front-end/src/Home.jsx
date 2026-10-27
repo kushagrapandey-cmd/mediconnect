@@ -224,7 +224,7 @@ function Home() {
           health systems. Please use synthetic data.
         </div>
       </main>
-      <Footer />
+      <Footer contact />
     </>
   );
 }

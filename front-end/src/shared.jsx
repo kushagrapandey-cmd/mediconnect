@@ -1,7 +1,11 @@
 import React, { createContext, useEffect, useState } from "react";
+import Feedback from "./Feedback";
 import { Link } from "react-router-dom";
 import {
   FiActivity,
+  FiLinkedin,
+  FiGithub,
+  FiMail,
   FiArrowRight,
   FiCheckCircle,
   FiDownload,
@@ -79,8 +83,10 @@ function Notice({ children, error = false }) {
     </div>
   ) : null;
 }
-function Footer() {
+function Footer({ contact = false }) {
   return (
+    <>
+    {contact && <Feedback />}
     <footer>
       <div>
         <Brand />
@@ -92,11 +98,20 @@ function Footer() {
         <Link to="/privacy">Privacy & limitations</Link>
       </div>
       <div className="footer-note">
+        {contact && <section className="footer-contact" aria-labelledby="footer-contact-heading">
+          <h2 id="footer-contact-heading">Contact me</h2>
+          <nav aria-label="Contact Kushagra Pandey">
+            <a href="https://www.linkedin.com/in/kushagra-pandey-353b71175/" target="_blank" rel="noopener noreferrer"><FiLinkedin aria-hidden="true" /> LinkedIn</a>
+            <a href="https://github.com/kushagrapandey-cmd" target="_blank" rel="noopener noreferrer"><FiGithub aria-hidden="true" /> GitHub</a>
+            <a href="mailto:kushagrapandey102@gmail.com"><FiMail aria-hidden="true" /> Email</a>
+          </nav>
+        </section>}
         Built with purpose, by Kushagra & team.
         <br />
         Academic showcase · Use synthetic records only.
       </div>
     </footer>
+    </>
   );
 }
 function Modal({ title, children, onClose }) {

@@ -153,6 +153,7 @@ const auth = wrap(async (req, res, next) => {
 });
 const accountTools = require("./accounts")({ wrap, fail, limit, safeUser, clientKey });
 app.use("/api", accountTools.publicRoutes);
+app.use("/api", require("./feedback").feedbackRouter({wrap,fail,limit,clientKey}));
 app.use("/api", auth);
 app.use("/api", accountTools.privateRoutes);
 app.get("/api/auth/me", (req, res) => res.json({ user: safeUser(req.user) }));

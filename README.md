@@ -122,9 +122,13 @@ Synthetic data only. Doctor roles are self-selected. Email verification and emai
 
 Kushagra Pandey — Development · Arun Kumar Shukla — Database · Prajjwal Kumar — Interface design · Prince Kumar Pal — Backend
 
-### Nearby care (public homepage)
+### Experimental nearby care (preview only — not released)
 
-Visitors can search a public locality/city/PIN code or explicitly share browser
+This feature is retained on `feat/nearby-care` only. Real facility-provider
+requests timed out during preview verification on 28 October 2026, so it was not
+released to the production homepage. The existing site remains unchanged.
+
+The implementation lets visitors search a public locality/city/PIN code or explicitly share browser
 location without signing in. Choose 2, 5, 10 or 20 km; filter mapped hospitals,
 clinics, doctors, dentists and pharmacies. Results show available contact details
 and straight-line distances, with external Google Maps directions. OSM coverage

@@ -65,6 +65,15 @@ Verified 26 October 2026 using synthetic data on the feature preview with the ex
   safe rendering of HTML-looking facility names; normal wheel scrolling over the
   map; upstream error feedback and removal of stale results.
 - Existing eight tests plus two nearby-care validation/normalization tests pass.
-- Real provider smoke checks and deployment evidence are recorded separately
-  after the preview is available; mocked browser checks alone do not establish
-  upstream availability.
+- Preview provider verification: Nominatim returned HTTP 200 and two matching
+  Gomti Nagar locations. Invalid coordinates returned HTTP 400 as intended.
+  The original public Overpass service returned HTTP 503 in two attempts.
+  Private.coffee also failed with POST and GET: the final deployment
+  `dpl_8RabvaQkV5BxSvaTBQQwTxt5jN9K` logged `Map upstream failure TimeoutError`
+  at the configured 20-second deadline and returned HTTP 503.
+- RELEASE BLOCKED: facility lookup is not reliable enough. Production remains
+  on `64f5070` / `dpl_FSg764EcPRwS4Mgrr1VC5okV8d84`; `master` was not changed.
+  The experimental implementation is kept on `feat/nearby-care` only. No user
+  accounts, records or permissions were modified. A separate provider cache
+  table was created by preview tests and contains unlinked public location data.
+  Do not advertise this feature as live or end-to-end verified.

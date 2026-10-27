@@ -2,11 +2,21 @@
   "buildCommand": "npm run build",
   "outputDirectory": "front-end/build",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "/api" },
+    {
+      "source": "/api/:path*",
+      "destination": "/api"
+    },
     {
       "source": "/((?!api/|static/|assets/|favicon.svg).*)",
       "destination": "/index.html"
     }
   ],
-  "regions": ["sin1"]
+  "regions": [
+    "sin1"
+  ],
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "back-end/data/healthcare/**"
+    }
+  }
 }

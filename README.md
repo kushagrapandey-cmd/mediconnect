@@ -122,45 +122,57 @@ Synthetic data only. Doctor roles are self-selected. Email verification and emai
 
 Kushagra Pandey — Development · Arun Kumar Shukla — Database · Prajjwal Kumar — Interface design · Prince Kumar Pal — Backend
 
-### Experimental nearby care (preview only — not released)
+### Nearby care (public homepage, India)
 
-This feature is retained on `feat/nearby-care` only. Real facility-provider
-requests timed out during preview verification on 28 October 2026, so it was not
-released to the production homepage. The existing site remains unchanged.
-
-The implementation lets visitors search a public locality/city/PIN code or explicitly share browser
+Search a public locality/city/PIN code in India or explicitly share browser
 location without signing in. Choose 2, 5, 10 or 20 km; filter mapped hospitals,
-clinics, doctors, dentists and pharmacies. Results show available contact details
-and straight-line distances, with external Google Maps directions. OSM coverage
-is incomplete; names, services, hours and availability are not independently
-verified. No booking, live bed counts or emergency routing is provided.
+clinics, doctors, dentists and pharmacies. Up to 80 nearest mapped facilities are
+returned; the list renders ten at a time. Distances are approximate straight-line
+distances, not driving distances. Directions opens Google Maps. The dataset does
+not include verified phone numbers, opening hours, live beds or emergency status.
 
-Leaflet 1.9.4 and its CSS are a separate chunk downloaded only after a successful
-search. No map, geolocation request, geocoding or hospital query runs on page
-load or scroll. Wheel zoom is disabled; dragging and touch interaction require an
-explicit button. Lists render ten rows at a time, capped at 80 facilities.
+The feature uses a **9 October 2026 OpenStreetMap snapshot**, exported by HOT/HDX
+on 11 October 2026. Its 93,717 supported records are community mappings, not a
+complete or independently verified hospital registry. Invalid mapping, missing
+facilities, closure and stale details remain possible. Coverage is India only.
+The data date and limitations are shown next to results.
 
-The Express `/api/places/search` and `/api/places/nearby` endpoints validate input,
-apply a shared per-client limit (30 requests/15 minutes) and use PostgreSQL gates
-across serverless instances (one new geocode per 2 seconds; one uncached facility
-query per 3 seconds). A lazily created `mc_places_cache` stores independent,
-unlinked location results: geocodes for seven days, facilities for one hour,
-pruned on writes to approximately 500 entries. Coordinates are rounded to three
-decimal places before querying; map providers still receive location information.
-No account or medical-record data is sent to map services. Provider/hosting logs
-may retain request data. Never submit a private address or medical details.
+#### Performance and data flow
 
-Public upstreams are best-effort services for modest usage, with no SLA. Policies:
-[Nominatim](https://operations.osmfoundation.org/policies/nominatim/),
-[OSM tiles](https://operations.osmfoundation.org/policies/tiles/),
-[Private.coffee Overpass](https://overpass.private.coffee/).
-No autocomplete, bulk prefetch or polling is implemented. Cache hits avoid
-upstream calls. `GEOCODING_URL`, `OVERPASS_URL` and `MAP_TILE_URL` can switch
-providers without changing client code (use compatible formats and update CSP
-and attribution if switching tiles). Initial defaults require no API key.
-Do not treat public shared servers as an unlimited production backend; reassess
-providers if traffic grows. A service failure displays a retry message and leaves
-existing account/record workflows untouched.
+- No map tiles, geolocation requests or hospital queries run on page load or
+  scroll. Leaflet 1.9.4 and its CSS load as a separate chunk after search results.
+- Wheel zoom is disabled. Map dragging and touch interaction need an explicit
+  button so the map does not capture normal page scrolling. At most 80 markers
+  render, with no polling, animated marker loops or background refresh.
+- `/api/places/search` proxies a submitted locality to Nominatim. Geocodes are
+  cached independently of accounts for seven days. PostgreSQL enforces one new
+  geocoding request per two seconds across all serverless instances, and a shared
+  per-client budget of 30 search requests per 15 minutes. No autocomplete.
+- `/api/places/nearby` validates coordinates/radius, rounds coordinates to three
+  decimal places, and searches the **bundled dataset**, without an external
+  hospital API. Only intersecting four-degree grid files are read, asynchronously;
+  a bounded eight-tile cache avoids repeated decompression. The browser receives
+  nearby results, never the whole country dataset. No record or account data is
+  sent to map providers. Approximate coordinates reach our server; hosting logs
+  may retain request information.
+- The compressed server dataset is approximately 2.81 MB across 33 files and is
+  included in the Node function via `vercel.json`. It is not part of the browser
+  bundle or initial network download. Account/record routes do not load it.
+- `/api/places/dataset` exposes provenance, snapshot date and license. The adapted
+  database in `back-end/data/healthcare` is ODbL-1.0, with attribution and source
+  metadata. To refresh manually, download the source ZIP linked in its manifest
+  and run `python scripts/build-healthcare.py /path/to/source.zip`, review changes,
+  run tests and redeploy. No updates or bulk downloads run during user searches.
 
-Rollback: revert the nearby-care commit and redeploy. The optional cache table
-is independent of accounts and can be dropped separately; do not alter user data.
+[Nominatim policy](https://operations.osmfoundation.org/policies/nominatim/) and
+[OSM tile policy](https://operations.osmfoundation.org/policies/tiles/) apply.
+Both remain best-effort services with limited capacity. `GEOCODING_URL` and
+`MAP_TILE_URL` can switch to compatible providers without changing client code;
+update attribution and CSP for another tile provider. Initial defaults need no
+API key. Do not enter a home address, medical details or confidential information.
+Public provider errors are handled with retry messages and the records workspace
+remains usable. Reassess providers as traffic grows.
+
+Rollback: revert the nearby-care change and redeploy the previous production
+commit. The independent geocoding-cache table can be dropped separately; never
+alter user records to roll this feature back.

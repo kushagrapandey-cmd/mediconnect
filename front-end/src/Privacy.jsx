@@ -40,17 +40,18 @@ function Privacy() {
           <h3>Nearby care search</h3>
           <p>
             This public feature does not require an account. A submitted locality is
-            sent to Nominatim; approximate coordinates are sent to Private.coffee’s Overpass service to find
-            mapped healthcare facilities. OpenStreetMap map tiles load after a
+            sent to Nominatim to find a place in India. Approximate coordinates are
+            processed by our server against a bundled OpenStreetMap India snapshot
+            dated 9 October 2026; no external hospital-query API receives them. OpenStreetMap map tiles load after a
             successful search and expose your IP address and map area to the tile
             provider. Directions opens Google Maps. Do not enter a home address or
             health information. Location permission is requested only when you
-            choose Use my location. Search results are cached independently of
+            choose Use my location. Locality geocoding results are cached independently of
             accounts, with no link to your medical records. Provider and hosting
             logs may retain request information. Coverage and opening hours are
             unverified; this is not an emergency service.
           </p>
-          <p>Map provider policies: <a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener noreferrer">OpenStreetMap Foundation</a> and <a href="https://overpass.private.coffee/#privacy-policy" target="_blank" rel="noopener noreferrer">Private.coffee</a>.</p>
+          <p>Map provider policies: <a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener noreferrer">OpenStreetMap Foundation</a>.</p>
           <h3>Deleting a record</h3>
           <p>
             You can delete your own documents from the library. The content is

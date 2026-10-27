@@ -1,0 +1,187 @@
+{
+  "country": "India",
+  "snapshot": "2026-10-09",
+  "generated": "2026-10-11",
+  "source": "OpenStreetMap contributors via HOT / HDX",
+  "sourceUrl": "https://data.humdata.org/dataset/hotosm_ind_health_facilities",
+  "downloadUrl": "https://production-raw-data-api.s3.amazonaws.com/ISO3/IND/health_facilities/hotosm_ind_health_facilities_osm_geojson.zip",
+  "sourceSha256": "5b2c036798554a5842b66dbbd88f98d4561269a5e05de377513fd6454f6deff3",
+  "license": "ODbL-1.0",
+  "licenseUrl": "https://opendatacommons.org/licenses/odbl/1-0/",
+  "gridDegrees": 4,
+  "kinds": [
+    "Hospital",
+    "Clinic",
+    "Doctor",
+    "Dental",
+    "Pharmacy"
+  ],
+  "count": 93717,
+  "files": {
+    "2_18": {
+      "count": 1572,
+      "bytes": 39945,
+      "sha256": "3daed36bc64b27f2153e145093d63c95221640c0a6860376c92296d4c9101d6d"
+    },
+    "2_19": {
+      "count": 13344,
+      "bytes": 361795,
+      "sha256": "0e26b512aa4b79af4aec2835cec2b8c6492a34cf2a552145a82e56b2d3f48912"
+    },
+    "2_23": {
+      "count": 21,
+      "bytes": 818,
+      "sha256": "17a671c1567020c6fcc4ef8c6aa353b67c9e25f8985bc5ca0dc5719d31792658"
+    },
+    "3_18": {
+      "count": 2992,
+      "bytes": 85897,
+      "sha256": "03c9df41b7bb515310c17defc60120b5ae582c12e76f2c1d43c482f9c2aa6b4e"
+    },
+    "3_19": {
+      "count": 9391,
+      "bytes": 257060,
+      "sha256": "9341755c998bbca890e37a7eb3fb0cfe05153973cfe4a4dc4176d06ecc848417"
+    },
+    "3_20": {
+      "count": 3074,
+      "bytes": 85271,
+      "sha256": "2ee51aa435c303ec62010b0c7ea1ef9ea993194926954d275bd116602b39e018"
+    },
+    "3_23": {
+      "count": 3,
+      "bytes": 213,
+      "sha256": "6bc5b979c8d52aae006419ba46cb9a2182ef6523cb8bd2b78ea768ea2d8f97db"
+    },
+    "4_18": {
+      "count": 7224,
+      "bytes": 256307,
+      "sha256": "370aa4805fbefd0f9885ef9a16564c36d663967ca7484510b32f33c81a98e727"
+    },
+    "4_19": {
+      "count": 7349,
+      "bytes": 242114,
+      "sha256": "98a0ac17d43c0e5581cacf433d8d6fb3f49721a3208c53b89df88650c9ffd150"
+    },
+    "4_20": {
+      "count": 3413,
+      "bytes": 91393,
+      "sha256": "fff4d345518d6b3fc29cc4453ecdc616cc8ceae67e2d51ed46d5f3551756e724"
+    },
+    "4_21": {
+      "count": 281,
+      "bytes": 8806,
+      "sha256": "2eacb673c5d47cc2fd026863673b50920efbd7d02b4fa6eea4475ff1de842575"
+    },
+    "5_17": {
+      "count": 1755,
+      "bytes": 47902,
+      "sha256": "bd0e725aa2be0b9c3151fdaa2bb312a023c717892a4bd0a57169bf69ffc11def"
+    },
+    "5_18": {
+      "count": 8692,
+      "bytes": 275391,
+      "sha256": "52135710172f0ca9fe749a90efebe22f735da2fce995a0e1f26c5c6fa46c3505"
+    },
+    "5_19": {
+      "count": 2834,
+      "bytes": 91430,
+      "sha256": "39ea21b048e517942765942819cf8da01d5a5892b15f9047d09d367c7981a1ca"
+    },
+    "5_20": {
+      "count": 1483,
+      "bytes": 46463,
+      "sha256": "4f121712f7fd859789204167ab99f1ac2b441a11f97c696358988715f0136da4"
+    },
+    "5_21": {
+      "count": 2585,
+      "bytes": 79821,
+      "sha256": "35b27e21b52adf0d01dec5096fa209395989efaed0ec4952e3b61a5b555eb067"
+    },
+    "5_22": {
+      "count": 1149,
+      "bytes": 41025,
+      "sha256": "bac53b9566fafb0e6ed88db782af20fbfe93794cf0b09b167465101722dcad08"
+    },
+    "5_23": {
+      "count": 53,
+      "bytes": 2090,
+      "sha256": "96950522a6b3ea7b26b9d9a2c106893b7366cccb84f5439be83fa2aea7e9aa83"
+    },
+    "6_17": {
+      "count": 155,
+      "bytes": 4261,
+      "sha256": "5725fe5107876467ba13123cc70870d3a63001c2d667f11ccfbe44e36ba429d8"
+    },
+    "6_18": {
+      "count": 3194,
+      "bytes": 90703,
+      "sha256": "6d6cd58c9b6a02496cb56284f0fa066dd9a37fa0accaa5b4bcf42892369ce6f2"
+    },
+    "6_19": {
+      "count": 2003,
+      "bytes": 61134,
+      "sha256": "e026a70de307e2dba307ba824e54e5efd617c926b5a41fbc3172ccaf9a3fb7ab"
+    },
+    "6_20": {
+      "count": 2926,
+      "bytes": 99112,
+      "sha256": "936b3cceaec3f86394ef17a36f6166cc1b31e4f90f7eb033a4df2bb57e1df794"
+    },
+    "6_21": {
+      "count": 2020,
+      "bytes": 63666,
+      "sha256": "0aa5e2db2dff997ef5a086200670a1311ee96e6921f9ce4a16785934e542f294"
+    },
+    "6_22": {
+      "count": 1654,
+      "bytes": 50199,
+      "sha256": "4af426efabf5540fa2de0f6ae8c83265c66a24eee0afbb1b79e8a5460f141a0e"
+    },
+    "6_23": {
+      "count": 1044,
+      "bytes": 33777,
+      "sha256": "ca3ad440caabe1f3bc66b2ad70de1928da07fddad28395d216b2367ed3b856d6"
+    },
+    "6_24": {
+      "count": 6,
+      "bytes": 247,
+      "sha256": "a5d90f2d3d765631620936b878d06dc317bf83e8260e4ddcddcf8cd0576d61c4"
+    },
+    "7_18": {
+      "count": 4777,
+      "bytes": 123235,
+      "sha256": "55ce06f81f98c787eae2f09d87cb7843a43654602fc234203dbcc36ccd69e509"
+    },
+    "7_19": {
+      "count": 7488,
+      "bytes": 236294,
+      "sha256": "47d2bcf66fb36f5f50dc48e3f32cea433e206b30c2e91a67fde55865eda9da57"
+    },
+    "7_20": {
+      "count": 42,
+      "bytes": 1687,
+      "sha256": "139d78b3fc93a306c58e1a9d55da5dfb708404bad259354351669e93c55ecff4"
+    },
+    "7_23": {
+      "count": 14,
+      "bytes": 520,
+      "sha256": "10f31cccc488b2c53b213b680283c2d35df6e3f39aceffd455ec3b7335f7c733"
+    },
+    "7_24": {
+      "count": 1,
+      "bytes": 89,
+      "sha256": "d8aa32a4a575301ab29902b7b4a505ad4b3dc2cdc7485cc1f6ae622a9f9cbbc5"
+    },
+    "8_18": {
+      "count": 999,
+      "bytes": 28077,
+      "sha256": "b1be61e2425a210ff6e646286f0a9c68ebd24762c9c8e074991a3cc6b9060140"
+    },
+    "8_19": {
+      "count": 179,
+      "bytes": 5832,
+      "sha256": "223bc664a308e1ad4dff3b43e7d046270c8abbe74c0c47e2849d3718f465abc0"
+    }
+  }
+}

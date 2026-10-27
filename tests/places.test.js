@@ -11,3 +11,13 @@ test('facility results use distance, remove duplicate map elements and reject un
   assert.equal(list.length,2);assert.equal(list[0].phone,'');assert.equal(list[1].type,'Doctor');assert.equal(list[1].phone,'+91 12345 67890');
   assert.equal(distance(0,0,0,0),0);
 });
+test('bundled India snapshot returns bounded, sorted real results without a provider request',async()=>{
+ const {findNearby,manifest}=require('../back-end/healthcare-data');
+ assert.equal(manifest.snapshot,'2026-10-09');assert.equal(manifest.count,93717);
+ for(const [lat,lon] of [[26.45,80.332],[26.853,80.999],[28.614,77.209],[12.972,77.595]]){
+  const r=await findNearby(lat,lon,5,distance);assert.ok(r.total>0);assert.ok(r.facilities.length<=80);
+  for(const p of r.facilities){assert.ok(distance(lat,lon,p.lat,p.lon)<=5);assert.ok(manifest.kinds.includes(p.type));}
+  assert.deepEqual(r.facilities.map(p=>p.distance),r.facilities.map(p=>p.distance).toSorted((a,b)=>a-b));
+ }
+ const empty=await findNearby(51.5,-.1,5,distance);assert.equal(empty.total,0);
+});

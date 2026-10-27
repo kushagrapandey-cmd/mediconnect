@@ -77,3 +77,16 @@ Verified 26 October 2026 using synthetic data on the feature preview with the ex
   accounts, records or permissions were modified. A separate provider cache
   table was created by preview tests and contains unlinked public location data.
   Do not advertise this feature as live or end-to-end verified.
+
+
+## Nearby-care retry — 28 October 2026
+
+The runtime hospital provider was replaced with a bundled, licensed OSM India
+snapshot (9 October 2026) after external-provider failures. No claim is made that
+those external APIs were fixed. Local checks found real results in Kanpur,
+Lucknow, Delhi and Bengaluru, with first tile reads/scans taking 4–21 ms in this
+runtime. Only nearby rows are returned to the client. All 11 tests pass, including
+radius bounds, result ordering, supported types and empty out-of-coverage search.
+The real deployment and browser verification below supersede the earlier release
+block only after they pass; this is a separate data path from the failed Overpass
+prototype.

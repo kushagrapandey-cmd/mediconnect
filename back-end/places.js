@@ -65,15 +65,19 @@ async function gate(provider, seconds) {
 }
 module.exports = ({wrap, limit, clientKey}) => {
   const router = express.Router();
+  router.get('/places/dataset', (req,res)=>{
+    const {manifest}=require('./healthcare-data');
+    res.json({country:manifest.country,snapshot:manifest.snapshot,count:manifest.count,source:manifest.source,sourceUrl:manifest.sourceUrl,license:manifest.license,licenseUrl:manifest.licenseUrl,adaptedDatabase:'https://github.com/kushagrapandey-cmd/mediconnect/tree/master/back-end/data/healthcare'});
+  });
   router.get('/places/config', (req,res)=>res.json({tileUrl:process.env.MAP_TILE_URL || 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'}));
   router.get('/places/search', wrap(async(req,res)=>{
     const query = text(req.query.q,121).trim();
     if (query.length<3 || query.length>120 || /[\r\n<>@]/.test(query)) throw error(400,'Enter a locality, city or PIN code (3–120 characters).');
     await limit(`places:${clientKey(req)}`,30);
-    const places = await cached('geocode:'+query.toLowerCase(),604800,async()=>{
+    const places = await cached('geocode:india:'+query.toLowerCase(),604800,async()=>{
       await gate('nominatim',2);
       const url = new URL(process.env.GEOCODING_URL || 'https://nominatim.openstreetmap.org/search');
-      url.search = new URLSearchParams({q:query,format:'jsonv2',limit:'5','accept-language':'en'});
+      url.search = new URLSearchParams({q:query,format:'jsonv2',countrycodes:'in',limit:'5','accept-language':'en'});
       const data = await upstream(url);
       if (!Array.isArray(data)) throw error(503,'Location search is temporarily unavailable.');
       return data.map(p=>({name:text(p.display_name,250),lat:Number(p.lat),lon:Number(p.lon)})).filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon));
@@ -85,15 +89,8 @@ module.exports = ({wrap, limit, clientKey}) => {
     const radius = Number(req.query.radius);
     if (![2,5,10,20].includes(radius)) throw error(400,'Choose a radius of 2, 5, 10 or 20 km.');
     await limit(`places:${clientKey(req)}`,30);
-    const result = await cached(`nearby:${lat}:${lon}:${radius}`,3600,async()=>{
-      await gate('overpass',3);
-      const query = `[out:json][timeout:15][maxsize:8388608];(nwr["amenity"~"^(hospital|clinic|doctors|dentist|pharmacy)$"](around:${radius*1000},${lat},${lon});nwr["healthcare"~"^(hospital|clinic|doctor|dentist|pharmacy)$"](around:${radius*1000},${lat},${lon}););out center tags;`;
-      const endpoint = new URL(process.env.OVERPASS_URL || 'https://overpass.private.coffee/api/interpreter');
-      endpoint.searchParams.set('data',query);
-      const data = await upstream(endpoint,{},20000);
-      if (!Array.isArray(data.elements) || data.remark) throw error(503,'Hospital search could not finish. Try a smaller radius.');
-      return {center:{lat,lon},facilities:facilities(data.elements,lat,lon,radius),limited:data.elements.length>=80};
-    });
+    const {findNearby} = require('./healthcare-data');
+    const result = await findNearby(lat,lon,radius,distance);
     res.json(result);
   }));
   return router;

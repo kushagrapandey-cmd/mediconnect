@@ -15,12 +15,13 @@ const app = express();
 app.disable("x-powered-by");
 app.use(
   helmet({
+    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
         scriptSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", "data:"],
+        imgSrc: ["'self'", "data:", "https://tile.openstreetmap.org"],
         frameSrc: ["'self'"],
         connectSrc: ["'self'"],
         objectSrc: ["'none'"],
@@ -85,6 +86,7 @@ const clientKey = (req) =>
   req.headers["x-vercel-forwarded-for"] ||
   req.socket.remoteAddress ||
   "unknown";
+app.use("/api", require("./places")({wrap, limit, clientKey}));
 async function session(res, u, req) {
   const token = randomBytes(32).toString("hex");
   await getSql()`DELETE FROM mc_sessions WHERE expires_at < now()`;

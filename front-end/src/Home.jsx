@@ -1,4 +1,5 @@
 import React from "react";
+import NearbyCare from "./NearbyCare";
 import { Link } from "react-router-dom";
 import {
   FiActivity,
@@ -209,6 +210,7 @@ function Home() {
             ))}
           </ol>
         </section>
+        <NearbyCare />
         <section className="cta container">
           <FiHeart />
           <span className="eyebrow">MORE TIME FOR WHAT MATTERS</span>

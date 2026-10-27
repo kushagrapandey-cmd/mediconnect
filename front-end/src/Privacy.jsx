@@ -37,6 +37,19 @@ function Privacy() {
             recovery key. Clinical validation, regulatory certification and
             government interoperability are not implemented.
           </p>
+          <h3>Nearby care search</h3>
+          <p>
+            This public feature does not require an account. A submitted locality is
+            sent to Nominatim; approximate coordinates are sent to Overpass to find
+            mapped healthcare facilities. OpenStreetMap map tiles load after a
+            successful search and expose your IP address and map area to the tile
+            provider. Directions opens Google Maps. Do not enter a home address or
+            health information. Location permission is requested only when you
+            choose Use my location. Search results are cached independently of
+            accounts, with no link to your medical records. Provider and hosting
+            logs may retain request information. Coverage and opening hours are
+            unverified; this is not an emergency service.
+          </p>
           <h3>Deleting a record</h3>
           <p>
             You can delete your own documents from the library. The content is

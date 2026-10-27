@@ -48,3 +48,23 @@ Verified 26 October 2026 using synthetic data on the feature preview with the ex
 - Test documents were removed; synthetic accounts and application history remain.
 - Public navigation and recovery page were inspected in the cloud browser. Authenticated workflows were tested through the API; no claim of full browser automation is made.
 - Email sending remains unconfigured. Natural expiry was not waited out. No real UHI/ABDM integration was performed.
+
+## Nearby-care addition — 28 October 2026
+
+- Baseline: commit `64f5070`; local production builds in headless Chromium,
+  390×900 and 1440×900, three fresh contexts per width. The browser and server ran
+  in the same environment. Auth-me was stubbed as anonymous for isolation.
+- Initial compressed JS: 76.91 KB → 79.89 KB; compressed CSS: 8.69 → 9.15 KB.
+  Leaflet/map chunk 44.29 KB compressed JS + 6.36 KB CSS loads only after results.
+- Local scripted scrolling (90 animation frames): p95 frame intervals stayed
+  roughly 17–18 ms before and after. No horizontal overflow or JS page errors.
+  These are controlled local measurements, not real-device or network guarantees.
+- Mobile/desktop browser checks with synthetic provider responses passed:
+  no idle map/provider requests even when scrolled to the section; ambiguous
+  location selection; results; ten-row pagination; type filtering; geolocation;
+  safe rendering of HTML-looking facility names; normal wheel scrolling over the
+  map; upstream error feedback and removal of stale results.
+- Existing eight tests plus two nearby-care validation/normalization tests pass.
+- Real provider smoke checks and deployment evidence are recorded separately
+  after the preview is available; mocked browser checks alone do not establish
+  upstream availability.

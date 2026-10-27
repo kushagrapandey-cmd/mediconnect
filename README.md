@@ -121,3 +121,42 @@ Synthetic data only. Doctor roles are self-selected. Email verification and emai
 ## Team
 
 Kushagra Pandey — Development · Arun Kumar Shukla — Database · Prajjwal Kumar — Interface design · Prince Kumar Pal — Backend
+
+### Nearby care (public homepage)
+
+Visitors can search a public locality/city/PIN code or explicitly share browser
+location without signing in. Choose 2, 5, 10 or 20 km; filter mapped hospitals,
+clinics, doctors, dentists and pharmacies. Results show available contact details
+and straight-line distances, with external Google Maps directions. OSM coverage
+is incomplete; names, services, hours and availability are not independently
+verified. No booking, live bed counts or emergency routing is provided.
+
+Leaflet 1.9.4 and its CSS are a separate chunk downloaded only after a successful
+search. No map, geolocation request, geocoding or hospital query runs on page
+load or scroll. Wheel zoom is disabled; dragging and touch interaction require an
+explicit button. Lists render ten rows at a time, capped at 80 facilities.
+
+The Express `/api/places/search` and `/api/places/nearby` endpoints validate input,
+apply a shared per-client limit (30 requests/15 minutes) and use PostgreSQL gates
+across serverless instances (one new geocode per 2 seconds; one uncached facility
+query per 3 seconds). A lazily created `mc_places_cache` stores independent,
+unlinked location results: geocodes for seven days, facilities for one hour,
+pruned on writes to approximately 500 entries. Coordinates are rounded to three
+decimal places before querying; map providers still receive location information.
+No account or medical-record data is sent to map services. Provider/hosting logs
+may retain request data. Never submit a private address or medical details.
+
+Public upstreams are best-effort services for modest usage, with no SLA. Policies:
+[Nominatim](https://operations.osmfoundation.org/policies/nominatim/),
+[OSM tiles](https://operations.osmfoundation.org/policies/tiles/),
+[Overpass](https://dev.overpass-api.de/overpass-doc/en/preface/commons.html).
+No autocomplete, bulk prefetch or polling is implemented. Cache hits avoid
+upstream calls. `GEOCODING_URL`, `OVERPASS_URL` and `MAP_TILE_URL` can switch
+providers without changing client code (use compatible formats and update CSP
+and attribution if switching tiles). Initial defaults require no API key.
+Do not treat public shared servers as an unlimited production backend; reassess
+providers if traffic grows. A service failure displays a retry message and leaves
+existing account/record workflows untouched.
+
+Rollback: revert the nearby-care commit and redeploy. The optional cache table
+is independent of accounts and can be dropped separately; do not alter user data.

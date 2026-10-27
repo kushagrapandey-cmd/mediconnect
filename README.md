@@ -149,7 +149,7 @@ may retain request data. Never submit a private address or medical details.
 Public upstreams are best-effort services for modest usage, with no SLA. Policies:
 [Nominatim](https://operations.osmfoundation.org/policies/nominatim/),
 [OSM tiles](https://operations.osmfoundation.org/policies/tiles/),
-[Overpass](https://dev.overpass-api.de/overpass-doc/en/preface/commons.html).
+[Private.coffee Overpass](https://overpass.private.coffee/).
 No autocomplete, bulk prefetch or polling is implemented. Cache hits avoid
 upstream calls. `GEOCODING_URL`, `OVERPASS_URL` and `MAP_TILE_URL` can switch
 providers without changing client code (use compatible formats and update CSP

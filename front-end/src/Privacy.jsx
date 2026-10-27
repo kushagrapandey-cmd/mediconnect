@@ -40,7 +40,7 @@ function Privacy() {
           <h3>Nearby care search</h3>
           <p>
             This public feature does not require an account. A submitted locality is
-            sent to Nominatim; approximate coordinates are sent to Overpass to find
+            sent to Nominatim; approximate coordinates are sent to Private.coffee’s Overpass service to find
             mapped healthcare facilities. OpenStreetMap map tiles load after a
             successful search and expose your IP address and map area to the tile
             provider. Directions opens Google Maps. Do not enter a home address or
@@ -50,6 +50,7 @@ function Privacy() {
             logs may retain request information. Coverage and opening hours are
             unverified; this is not an emergency service.
           </p>
+          <p>Map provider policies: <a href="https://osmfoundation.org/wiki/Privacy_Policy" target="_blank" rel="noopener noreferrer">OpenStreetMap Foundation</a> and <a href="https://overpass.private.coffee/#privacy-policy" target="_blank" rel="noopener noreferrer">Private.coffee</a>.</p>
           <h3>Deleting a record</h3>
           <p>
             You can delete your own documents from the library. The content is

@@ -59,12 +59,15 @@ test('account and upload concurrency (isolated PostgreSQL schema)', {skip: !conn
     assert.equal(r.status, 201, JSON.stringify(r.body));
     return {...r.body, email, cookie:r.headers['set-cookie'][0].split(';')[0]};
   }
+  async function prepareEmailReset(user) {
+    user.resetToken = randomBytes(32).toString('hex');
+    await pool.query("INSERT INTO mc_account_tokens(token,user_id,kind,expires_at) VALUES ($1,$2,'reset',now()+interval '30 minutes')",[digest(user.resetToken),user.user.id]);
+  }
   async function reset(user, mode) {
     if (mode === 'key') return request(app).post('/api/auth/recover').send({email:user.email, recoveryKey:user.recoveryKey, password:newPassword});
     if (mode === 'password') return request(app).post('/api/account/password').set('Cookie',user.cookie).send({currentPassword:oldPassword,password:newPassword});
-    const token = randomBytes(32).toString('hex');
-    await pool.query("INSERT INTO mc_account_tokens(token,user_id,kind,expires_at) VALUES ($1,$2,'reset',now()+interval '30 minutes')",[digest(token),user.user.id]);
-    return request(app).post('/api/auth/complete').send({token,kind:'reset',password:newPassword});
+    if (!user.resetToken) await prepareEmailReset(user);
+    return request(app).post('/api/auth/complete').send({token:user.resetToken,kind:'reset',password:newPassword});
   }
   try {
     for (const mode of ['key','email','password']) {
@@ -93,6 +96,9 @@ test('account and upload concurrency (isolated PostgreSQL schema)', {skip: !conn
     for (const mode of ['key','email','password']) {
       await t.test(`${mode}: revocation waits for a login that already inserted its session`, async () => {
         const user = await signup(), inserted = gate(), waiting = gate();
+        // Seed the reset token before holding the user lock: its foreign-key
+        // check also takes a row lock, which would otherwise deadlock the test.
+        if (mode === 'email') await prepareEmailReset(user);
         after = async stmt => {
           if(stmt.text.startsWith('INSERT INTO mc_sessions')) {
             after = async () => {}; inserted.reached(); await inserted.hold;

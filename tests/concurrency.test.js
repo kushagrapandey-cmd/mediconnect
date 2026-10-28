@@ -85,6 +85,25 @@ test('account and upload concurrency (isolated PostgreSQL schema)', {skip: !conn
         assert.equal((await pool.query('SELECT * FROM mc_sessions WHERE user_id=$1',[user.user.id])).rowCount,0);
       });
     }
+    await t.test('stale recovery-key rotation cannot replace a recovered account key', async () => {
+      const user = await signup(), paused = gate();
+      hooks.before = async stmt => {
+        if (stmt.text.startsWith('UPDATE mc_users SET recovery_hash=')) {
+          hooks.before = async()=>{}; paused.reached(); await paused.hold;
+        }
+      };
+      const rotation = request(app).post('/api/account/recovery-key').set('Cookie',user.cookie)
+        .send({password:oldPassword}).then(r=>r);
+      await paused.wait;
+      let recovered;
+      try {recovered = await reset(user,'key');} finally {paused.release();}
+      const stale = await rotation;
+      assert.equal(recovered.status,200);
+      assert.equal(stale.status,409);
+      assert.equal(stale.body.recoveryKey,undefined);
+      const {rows} = await pool.query('SELECT recovery_hash FROM mc_users WHERE id=$1',[user.user.id]);
+      assert.equal(rows[0].recovery_hash,digest(recovered.body.recoveryKey));
+    });
     await t.test('two uploads compete for the final slot, deletion makes capacity available', async () => {
       const user = await signup();
       await pool.query(`INSERT INTO mc_records(id,owner_id,title,category,record_date,filename,mime,size,content)

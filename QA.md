@@ -123,12 +123,14 @@ Without `TEST_DATABASE_URL`, these integration checks are explicitly skipped;
 the existing unit tests still run. GitHub Actions supplies PostgreSQL 16 and runs
 both suites on pull requests and pushes to master.
 
-The seven regression cases cover:
+The eight regression cases cover:
 
 - Recovery-key reset, email-link reset, and signed-in password change completing
   after a login reads the old password: no session or cookie may be issued.
 - The reverse ordering for all three password paths: a reset waits for a login
   that has inserted its session, then revokes that session before returning.
+- An in-flight recovery-key rotation cannot replace the key issued by a completed
+  password recovery.
 - Two simultaneous uploads with 29 stored records: exactly one succeeds, the
   patient stays at 30, further uploads fail, and deleting a record frees a slot.
 

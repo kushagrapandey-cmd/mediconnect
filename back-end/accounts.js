@@ -98,7 +98,8 @@ module.exports=({wrap,fail,limit,safeUser,clientKey})=>{
     await limit(`recovery-key:${req.user.id}`,5);
     if(typeof password!=='string'||password.length>128||!await verifyPassword(password,req.user.password))throw fail(400,'Current password is incorrect.');
     const key=randomBytes(24).toString('hex');
-    await getSql()`UPDATE mc_users SET recovery_hash=${digest(key)} WHERE id=${req.user.id}`;
+    const rows=await getSql()`UPDATE mc_users SET recovery_hash=${digest(key)} WHERE id=${req.user.id} AND password=${req.user.password} RETURNING id`;
+    if(!rows.length)throw fail(409,'Account changed. Sign in again.');
     res.json({recoveryKey:key});
   }));
   privateRoutes.post('/account/verify-email',wrap(async(req,res)=>{

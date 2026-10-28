@@ -90,3 +90,24 @@ radius bounds, result ordering, supported types and empty out-of-coverage search
 The real deployment and browser verification below supersede the earlier release
 block only after they pass; this is a separate data path from the failed Overpass
 prototype.
+
+### Release verification — 28 October 2026
+
+The snapshot implementation was released as commit
+`1c2005cf316a79049ae987b622beb3d346dab478`, production deployment
+`dpl_47WgUuwpqqC8T3mQAJXTrGRsRyKG` (READY). This supersedes the historical
+Overpass release block above; the external Overpass path is not used.
+
+The public production homepage was checked in the cloud browser without login:
+Gomti Nagar location selection → real nearby results → actual loaded OSM map
+tiles → Hospital/Clinic/All filters → Directions URLs and ten-to-twenty-row
+pagination. Light and dark theme controls remained usable. The DOM confirmed
+no horizontal overflow, ten initial rows and twelve successfully loaded 256 px
+map tiles. Normal page scrolling across the map was exercised. Browser warnings
+observed were from the browser extension, not the application. The earlier local
+390 px / 1440 px UI tests cover geolocation, failures and idle-request behavior;
+the final cloud smoke check was desktop, not a real mobile-device measurement.
+
+All 11 automated tests pass. Source metadata, ODbL attribution, snapshot date,
+India-only coverage and limits are documented. Live screenshot:
+`docs/nearby-care-live-20261028.jpg`. No patient accounts or records were changed.

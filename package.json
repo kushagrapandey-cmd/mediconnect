@@ -17,6 +17,7 @@
     "multer": "2.5.0"
   },
   "devDependencies": {
+    "pg": "^8.23.1",
     "supertest": "7.1.4"
   }
 }

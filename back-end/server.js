@@ -89,8 +89,15 @@ const clientKey = (req) =>
 app.use("/api", require("./places")({wrap, limit, clientKey}));
 async function session(res, u, req) {
   const token = randomBytes(32).toString("hex");
-  await getSql()`DELETE FROM mc_sessions WHERE expires_at < now()`;
-  await getSql()`INSERT INTO mc_sessions(token,user_id,expires_at,device) VALUES (${digest(token)},${u.id},now()+interval '7 days',${String(req?.headers["user-agent"] || "Browser session").slice(0,180)})`;
+  const q = getSql();
+  // Password mutations take this same lock. Use a separate statement so the
+  // credential check sees a fresh snapshot after any lock wait.
+  const [, rows] = await q.transaction([
+    q`SELECT id FROM mc_users WHERE id=${u.id} FOR UPDATE`,
+    q`INSERT INTO mc_sessions(token,user_id,expires_at,device) SELECT ${digest(token)},id,now()+interval '7 days',${String(req?.headers["user-agent"] || "Browser session").slice(0,180)} FROM mc_users WHERE id=${u.id} AND password=${u.password} RETURNING token`,
+    q`DELETE FROM mc_sessions WHERE expires_at < now()`,
+  ], { isolationLevel: "ReadCommitted" });
+  if (!rows.length) throw fail(401, "Account changed. Please sign in again.");
   res.cookie("mc_session", token, {
     httpOnly: true,
     secure: !!process.env.VERCEL,
@@ -231,32 +238,31 @@ app.post(
       throw fail(400, "Choose a valid date that is not in the future.");
     await limit(`upload:${req.user.id}`, 25);
     const q = getSql();
-    const [{ count }] =
-      await q`SELECT count(*) FROM mc_records WHERE owner_id=${req.user.id}`;
-    if (Number(count) >= 30)
-      throw fail(
-        400,
-        "This showcase supports 30 documents per patient. Remove a document before adding another.",
-      );
     const filename =
       path
         .basename(file.originalname)
         .replace(/[^a-zA-Z0-9._ -]/g, "_")
         .slice(0, 120) || "document";
-    const [record] = await q.query(
-      `INSERT INTO mc_records(id,owner_id,title,category,record_date,filename,mime,size,content) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING ${metadata}`,
-      [
-        randomUUID(),
-        req.user.id,
-        title.trim(),
-        category,
-        recordDate,
-        filename,
-        mime,
-        file.size,
-        file.buffer.toString("base64"),
-      ],
-    );
+    // Serialize uploads per patient before taking the count snapshot.
+    const [, records] = await q.transaction([
+      q`SELECT id FROM mc_users WHERE id=${req.user.id} FOR UPDATE`,
+      q.query(
+        `INSERT INTO mc_records(id,owner_id,title,category,record_date,filename,mime,size,content) SELECT $1,$2,$3,$4,$5,$6,$7,$8,$9 WHERE (SELECT count(*) FROM mc_records WHERE owner_id=$2) < 30 RETURNING ${metadata}`,
+        [
+          randomUUID(),
+          req.user.id,
+          title.trim(),
+          category,
+          recordDate,
+          filename,
+          mime,
+          file.size,
+          file.buffer.toString("base64"),
+        ],
+      ),
+    ], { isolationLevel: "ReadCommitted" });
+    const [record] = records;
+    if (!record) throw fail(400, "This showcase supports 30 documents per patient. Remove a document before adding another.");
     await audit(req.user.id, req.user.name, `Uploaded ${title.trim()}`);
     res.status(201).json({ record });
   }),

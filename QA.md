@@ -138,3 +138,9 @@ check/session insert or revocation so those operations receive a fresh snapshot
 after a lock wait. The salted password hash acts as the credential version.
 Uploads use the same per-patient row lock before a guarded count-and-insert;
 separate patients can still upload concurrently. No schema migration is needed.
+
+The same PostgreSQL CI job also runs `tests/full-flows.test.js`, which starts the
+real Express application with an isolated schema and executes the existing API
+and consent/account HTTP suites. Synthetic accounts and documents are removed
+with their schema; no deployed database URL is required by CI. The frontend
+production build runs after the tests.

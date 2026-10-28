@@ -24,7 +24,12 @@ module.exports=({wrap,fail,limit,safeUser,clientKey})=>{
     if(!emailOK(email)||typeof recoveryKey!=='string'||!/^[a-f0-9]{48}$/.test(recoveryKey)||!passwordOK(password))throw fail(400,'Enter your email, 48-character recovery key and a new password of 10–128 characters.');
     await limit(`recover:${clientKey(req)}`,10);await limit(`recover-email:${email.trim().toLowerCase()}`,5);
     const key=randomBytes(24).toString('hex'),hash=await hashPassword(password);
-    const [u]=await getSql()`WITH changed AS (UPDATE mc_users SET password=${hash},recovery_hash=${digest(key)} WHERE email=${email.trim().toLowerCase()} AND recovery_hash=${digest(recoveryKey)} RETURNING id), cleared AS (DELETE FROM mc_sessions WHERE user_id IN (SELECT id FROM changed)) SELECT id FROM changed`;
+    // Match session creation's user lock before taking the revocation snapshot.
+    const q=getSql();
+    const [, [u]]=await q.transaction([
+      q`SELECT id FROM mc_users WHERE email=${email.trim().toLowerCase()} FOR UPDATE`,
+      q`WITH changed AS (UPDATE mc_users SET password=${hash},recovery_hash=${digest(key)} WHERE email=${email.trim().toLowerCase()} AND recovery_hash=${digest(recoveryKey)} RETURNING id), cleared AS (DELETE FROM mc_sessions WHERE user_id IN (SELECT id FROM changed)) SELECT id FROM changed`,
+    ], {isolationLevel:'ReadCommitted'});
     if(!u)throw fail(400,'Email or recovery key is incorrect.');
     await getSql()`DELETE FROM mc_account_tokens WHERE user_id=${u.id}`;
     res.json({ok:true,recoveryKey:key});
@@ -52,7 +57,10 @@ module.exports=({wrap,fail,limit,safeUser,clientKey})=>{
     const q=getSql(),hash=kind==='reset'?await hashPassword(password):null;
     const rows=kind==='verify'
       ? await q`WITH used AS (DELETE FROM mc_account_tokens WHERE token=${digest(token)} AND kind='verify' AND expires_at>now() RETURNING user_id) UPDATE mc_users SET email_verified=true WHERE id IN (SELECT user_id FROM used) RETURNING id`
-      : await q`WITH used AS (DELETE FROM mc_account_tokens WHERE token=${digest(token)} AND kind='reset' AND expires_at>now() RETURNING user_id), changed AS (UPDATE mc_users SET password=${hash},recovery_hash=${digest(key)} WHERE id IN (SELECT user_id FROM used) RETURNING id), cleared AS (DELETE FROM mc_sessions WHERE user_id IN (SELECT id FROM changed)) SELECT id FROM changed`;
+      : (await q.transaction([
+          q`SELECT id FROM mc_users WHERE id IN (SELECT user_id FROM mc_account_tokens WHERE token=${digest(token)} AND kind='reset') FOR UPDATE`,
+          q`WITH used AS (DELETE FROM mc_account_tokens WHERE token=${digest(token)} AND kind='reset' AND expires_at>now() RETURNING user_id), changed AS (UPDATE mc_users SET password=${hash},recovery_hash=${digest(key)} WHERE id IN (SELECT user_id FROM used) RETURNING id), cleared AS (DELETE FROM mc_sessions WHERE user_id IN (SELECT id FROM changed)) SELECT id FROM changed`,
+        ], {isolationLevel:'ReadCommitted'}))[1];
     if(!rows.length)throw fail(400,'This link has expired or has already been used.');
     res.json({ok:true,...(kind==='reset'?{recoveryKey:key}:{})});
   }));
@@ -68,7 +76,11 @@ module.exports=({wrap,fail,limit,safeUser,clientKey})=>{
     await limit(`change-password:${req.user.id}`,5);
     if(!await verifyPassword(currentPassword,req.user.password))throw fail(400,'Current password is incorrect.');
     const hash=await hashPassword(password);
-    const rows=await getSql()`WITH changed AS (UPDATE mc_users SET password=${hash} WHERE id=${req.user.id} AND password=${req.user.password} RETURNING id), cleared AS (DELETE FROM mc_sessions WHERE user_id IN (SELECT id FROM changed)) SELECT id FROM changed`;
+    const q=getSql();
+    const [, rows]=await q.transaction([
+      q`SELECT id FROM mc_users WHERE id=${req.user.id} FOR UPDATE`,
+      q`WITH changed AS (UPDATE mc_users SET password=${hash} WHERE id=${req.user.id} AND password=${req.user.password} RETURNING id), cleared AS (DELETE FROM mc_sessions WHERE user_id IN (SELECT id FROM changed)) SELECT id FROM changed`,
+    ], {isolationLevel:'ReadCommitted'});
     if(!rows.length)throw fail(409,'Account changed. Sign in again.');
     await getSql()`DELETE FROM mc_account_tokens WHERE user_id=${req.user.id}`;
     res.clearCookie('mc_session',{path:'/'});res.json({ok:true});
@@ -86,7 +98,8 @@ module.exports=({wrap,fail,limit,safeUser,clientKey})=>{
     await limit(`recovery-key:${req.user.id}`,5);
     if(typeof password!=='string'||password.length>128||!await verifyPassword(password,req.user.password))throw fail(400,'Current password is incorrect.');
     const key=randomBytes(24).toString('hex');
-    await getSql()`UPDATE mc_users SET recovery_hash=${digest(key)} WHERE id=${req.user.id}`;
+    const rows=await getSql()`UPDATE mc_users SET recovery_hash=${digest(key)} WHERE id=${req.user.id} AND password=${req.user.password} RETURNING id`;
+    if(!rows.length)throw fail(409,'Account changed. Sign in again.');
     res.json({recoveryKey:key});
   }));
   privateRoutes.post('/account/verify-email',wrap(async(req,res)=>{

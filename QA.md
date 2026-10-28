@@ -111,3 +111,38 @@ the final cloud smoke check was desktop, not a real mobile-device measurement.
 All 11 automated tests pass. Source metadata, ODbL attribution, snapshot date,
 India-only coverage and limits are documented. Live screenshot:
 `docs/nearby-care-live-20261028.jpg`. No patient accounts or records were changed.
+
+## Account/session and document-cap concurrency regressions
+
+Run `TEST_DATABASE_URL=postgresql://... npm test` against an isolated PostgreSQL
+instance using a direct connection (not a transaction pooler). The database role
+must be able to create schemas. The suite creates a randomly named schema, runs
+the application's real bootstrap and HTTP handlers against real SQL, and removes
+its schema afterward. It never reads or modifies existing application tables.
+Without `TEST_DATABASE_URL`, these integration checks are explicitly skipped;
+the existing unit tests still run. GitHub Actions supplies PostgreSQL 16 and runs
+both suites on pull requests and pushes to master.
+
+The eight regression cases cover:
+
+- Recovery-key reset, email-link reset, and signed-in password change completing
+  after a login reads the old password: no session or cookie may be issued.
+- The reverse ordering for all three password paths: a reset waits for a login
+  that has inserted its session, then revokes that session before returning.
+- An in-flight recovery-key rotation cannot replace the key issued by a completed
+  password recovery.
+- Two simultaneous uploads with 29 stored records: exactly one succeeds, the
+  patient stays at 30, further uploads fail, and deleting a record frees a slot.
+
+Session creation and password mutations lock the same `mc_users` row in a
+READ COMMITTED transaction. The lock statement is separate from the credential
+check/session insert or revocation so those operations receive a fresh snapshot
+after a lock wait. The salted password hash acts as the credential version.
+Uploads use the same per-patient row lock before a guarded count-and-insert;
+separate patients can still upload concurrently. No schema migration is needed.
+
+The same PostgreSQL CI job also runs `tests/full-flows.test.js`, which starts the
+real Express application with an isolated schema and executes the existing API
+and consent/account HTTP suites. Synthetic accounts and documents are removed
+with their schema; no deployed database URL is required by CI. The frontend
+production build runs after the tests.
